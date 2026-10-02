@@ -207,8 +207,8 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
     margin:calc(var(--hpt) * -1) calc(var(--hpx) * -1) calc(var(--hpb) * -1);
     display:flex;flex-direction:column;gap:2px;
   }
-  .hero-bg-cell{position:relative;margin:0;min-width:0;}
-  .hero-bg-cell img{display:block;width:100%;height:auto;}
+  .hero-bg-cell{position:relative;margin:0;min-width:0;overflow:hidden;}
+  .hero-bg-cell img{display:block;width:100%;height:auto;transform:scale(var(--z,1));transform-origin:var(--ox,50%) var(--oy,50%);}
   /* Photo strength: 1st photo 90%, 2nd photo 50% - plus a dark layer so the hero writing stays clear */
   .hero-bg-cell:nth-child(1) img{opacity:.9;}
   .hero-bg-cell:nth-child(2) img{opacity:.5;}
@@ -390,6 +390,12 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
   .seen-in-logo img{display:block;height:calc(var(--logo-h,30px) * .8);width:auto;max-width:100%;object-fit:contain;filter:grayscale(1);opacity:.7;transition:opacity .3s ease,filter .3s ease;}
   .seen-in-logo:hover img{opacity:1;filter:grayscale(0);}
   @media(min-width:700px){.seen-in{padding:44px 40px;}.seen-in-logo{font-size:23px;}.seen-in-logo img{height:var(--logo-h,30px);}}
+  .hero-zoom{margin-top:16px;padding:14px;border:1px solid var(--line);border-radius:10px;max-width:460px;}
+  .hero-zoom h4{margin:0 0 10px;font-size:13px;font-weight:500;}
+  .hero-zoom label{display:flex;justify-content:space-between;font-size:12px;margin:8px 0 4px;color:var(--muted);}
+  .hero-zoom input[type=range]{width:100%;accent-color:var(--gold);}
+  .hero-zoom-prev{margin-top:12px;width:100%;max-width:240px;overflow:hidden;border-radius:8px;background:#000;}
+  .hero-zoom-prev img{display:block;width:100%;height:auto;transform:scale(var(--z,1));transform-origin:var(--ox,50%) var(--oy,50%);}
   .logo-size{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:10px;}
   .logo-size label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px;}
   .logo-size input[type=range]{width:100%;}
@@ -1345,7 +1351,10 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
         {label:'Lifestyle', image:''},
         {label:'Commercial', image:''}
       ],
-      bgImages: []
+      bgImages: [],
+      bgZoom: [],
+      bgPosX: [],
+      bgPosY: []
     },
     whatWeDo: {
       eyebrow: 'What we do',
@@ -1572,6 +1581,9 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
     models: 'https://images.unsplash.com/photo-1632765854612-9b02b6ec2b15?auto=format&fit=crop&w=1600&q=72',
     brands: 'https://images.unsplash.com/photo-1583167463546-12676e914c0a?auto=format&fit=crop&w=1600&q=72'
   };
+  // Hero photo zoom (100-300 %) and focal point, one entry per hero background photo.
+  function heroZoom(h, i){ var v = parseFloat((h.bgZoom||[])[i]); return isNaN(v) ? 100 : Math.max(100, Math.min(300, v)); }
+  function heroFocus(h, i, axis){ var v = parseFloat(((axis === 'x' ? h.bgPosX : h.bgPosY)||[])[i]); return isNaN(v) ? 50 : Math.max(0, Math.min(100, v)); }
   function clampPct(v, d){ v = parseFloat(v); return isNaN(v) ? d : Math.max(0, Math.min(100, v)); }
   // Inline style for one panel: focal point always, photo only when one was uploaded.
   function splitStyle(b, key){
@@ -1928,8 +1940,9 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
 
     app.innerHTML =
       '<section class="hero">'
-        + '<div class="hero-bg">' + heroBg.map(function(src){
-            return '<figure class="hero-bg-cell"><img src="'+src+'" alt="Vybe House"></figure>';
+        + '<div class="hero-bg">' + heroBg.map(function(src,i){
+            var hz = heroZoom(content.hero, i), hx = heroFocus(content.hero, i, 'x'), hy = heroFocus(content.hero, i, 'y');
+            return '<figure class="hero-bg-cell" style="--z:'+(hz/100)+';--ox:'+hx+'%;--oy:'+hy+'%;"><img src="'+src+'" alt="Vybe House"></figure>';
           }).join('') + '</div>'
         + '<div class="hero-content">'
           + '<div class="hero-main">'
@@ -3312,6 +3325,17 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
           + '<h3>Hero background images</h3>'
           + '<p class="hint">Shown as 2 large panels behind the hero text. Leave empty to use placeholder imagery.</p>'
           + imageManagerHtml(hero.bgImages)
+          + (hero.bgImages||[]).map(function(src,i){
+              var z = heroZoom(hero,i), hx = heroFocus(hero,i,'x'), hy = heroFocus(hero,i,'y');
+              return '<div class="hero-zoom" data-herozoom="'+i+'">'
+                + '<h4>Picture '+(i+1)+' size</h4>'
+                + '<label>Zoom <span data-hzval>'+z+'%</span></label>'
+                + '<input type="range" min="100" max="300" step="5" value="'+z+'" data-hzoom>'
+                + '<label>Left &harr; Right</label><input type="range" min="0" max="100" value="'+hx+'" data-hzx>'
+                + '<label>Top &harr; Bottom</label><input type="range" min="0" max="100" value="'+hy+'" data-hzy>'
+                + '<div class="hero-zoom-prev" data-hzprev style="--z:'+(z/100)+';--ox:'+hx+'%;--oy:'+hy+'%;"><img src="'+src+'" alt=""></div>'
+              + '</div>';
+            }).join('')
           + ((hero.bgImages||[]).length >= 2
               ? '<p class="hint">Maximum of 2 reached — remove one above to add another.</p>'
               : '<div class="field" style="margin-top:14px;"><input type="file" id="heroBgUpload" accept="image/*" multiple></div>')
@@ -3371,10 +3395,45 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
       });
 
       hero.bgImages = hero.bgImages || [];
-      wireImageDeletes(panel, hero.bgImages, function(){
-        saveContent(content);
-        toast('Image removed');
-        renderHeroPanel(panel, content);
+      // Removing a photo also removes its zoom / position settings.
+      Array.prototype.forEach.call(panel.querySelectorAll('[data-delidx]'), function(btn){
+        btn.addEventListener('click', function(){
+          var di = parseInt(btn.getAttribute('data-delidx'),10);
+          hero.bgImages.splice(di, 1);
+          ['bgZoom','bgPosX','bgPosY'].forEach(function(k){ if (hero[k]) hero[k].splice(di, 1); });
+          saveContent(content);
+          toast('Image removed');
+          renderHeroPanel(panel, content);
+        });
+      });
+
+      // Zoom + position sliders: preview changes as you drag, saves when you let go.
+      Array.prototype.forEach.call(panel.querySelectorAll('[data-herozoom]'), function(box){
+        var i = parseInt(box.getAttribute('data-herozoom'),10);
+        var zIn = box.querySelector('[data-hzoom]'), xIn = box.querySelector('[data-hzx]'), yIn = box.querySelector('[data-hzy]');
+        var val = box.querySelector('[data-hzval]'), prev = box.querySelector('[data-hzprev]');
+        function paint(){
+          prev.style.setProperty('--z', zIn.value / 100);
+          prev.style.setProperty('--ox', xIn.value + '%');
+          prev.style.setProperty('--oy', yIn.value + '%');
+          val.textContent = zIn.value + '%';
+        }
+        function save(){
+          var n = hero.bgImages.length;
+          ['bgZoom','bgPosX','bgPosY'].forEach(function(k){
+            hero[k] = (hero[k] || []).slice(0, n);
+            for (var j = 0; j < n; j++){ if (hero[k][j] === undefined) hero[k][j] = (k === 'bgZoom' ? 100 : 50); }
+          });
+          hero.bgZoom[i] = parseInt(zIn.value,10);
+          hero.bgPosX[i] = parseInt(xIn.value,10);
+          hero.bgPosY[i] = parseInt(yIn.value,10);
+          saveContent(content);
+          toast('Picture size saved');
+        }
+        [zIn, xIn, yIn].forEach(function(el){
+          el.addEventListener('input', paint);
+          el.addEventListener('change', save);
+        });
       });
 
       var heroBgUploadInput = document.getElementById('heroBgUpload');
