@@ -312,10 +312,50 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
   .split > div:last-child{border-bottom:none;}
   .split h2{font-family:'Fraunces',serif;font-size:clamp(26px,4vw,34px);font-style:italic;font-weight:500;letter-spacing:-.005em;margin-bottom:16px;}
   .split p{color:var(--muted);font-size:14px;line-height:1.7;max-width:380px;margin-bottom:28px;}
+
+  /* For models / For brands: photo behind the text, same idea as the hero.
+     Photo covers the panel, a dark overlay keeps the writing clear.
+     Photo credits (Unsplash, free to use): models - Good Faces; brands - Osamudiamen Imasuen.
+     To swap a photo change --img (desktop) / --img-sm (phones); --pos picks which part stays in view. */
+  .split-card{
+    position:relative;isolation:isolate;overflow:hidden;
+    display:flex;flex-direction:column;align-items:flex-start;justify-content:center;
+    min-height:440px;background-color:var(--panel);
+  }
+  .split-card::before{
+    content:'';position:absolute;inset:0;z-index:-2;
+    background-image:var(--img-sm);background-size:cover;background-repeat:no-repeat;background-position:var(--pos,center);
+    transition:transform 1.2s cubic-bezier(.2,.7,.2,1);
+  }
+  .split-card::after{
+    content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
+    background:linear-gradient(180deg,rgba(10,10,10,.66) 0%,rgba(10,10,10,.74) 100%);
+  }
+  .split-card:hover::before{transform:scale(1.04);}
+  @media(prefers-reduced-motion:reduce){.split-card::before{transition:none;}.split-card:hover::before{transform:none;}}
+  .split-card .eyebrow{text-shadow:0 1px 12px rgba(0,0,0,.45);}
+  .split-card h2{color:var(--offwhite);text-shadow:0 2px 18px rgba(0,0,0,.45);}
+  .split-card p{color:rgba(243,241,235,.82);text-shadow:0 1px 12px rgba(0,0,0,.5);}
+  .split-card .btn{background:rgba(10,10,10,.28);}
+  .split-card .btn:hover{background:var(--gold);}
+  .split-models{
+    --img-sm:url('https://images.unsplash.com/photo-1632765854612-9b02b6ec2b15?auto=format&fit=crop&w=900&q=70');
+    --img:url('https://images.unsplash.com/photo-1632765854612-9b02b6ec2b15?auto=format&fit=crop&w=1600&q=72');
+    --pos:50% 22%;
+  }
+  .split-brands{
+    --img-sm:url('https://images.unsplash.com/photo-1583167463546-12676e914c0a?auto=format&fit=crop&w=900&q=70');
+    --img:url('https://images.unsplash.com/photo-1583167463546-12676e914c0a?auto=format&fit=crop&w=1600&q=72');
+    --pos:50% 28%;
+  }
   @media(min-width:800px){
     .split{grid-template-columns:1fr 1fr;}
     .split > div{padding:64px;border-bottom:none;}
     .split > div:first-child{border-right:1px solid var(--line);}
+    .split-card{min-height:520px;}
+    .split-card::before{background-image:var(--img);}
+    /* heaviest on the text side, like the hero on desktop */
+    .split-card::after{background:linear-gradient(90deg,rgba(10,10,10,.78) 0%,rgba(10,10,10,.62) 60%,rgba(10,10,10,.5) 100%);}
   }
 
   /* ---------- STATS BAR ---------- */
@@ -658,6 +698,36 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
   .btn-small{font-size:10.5px;padding:8px 12px;}
   .btn-danger{border-color:var(--red);color:var(--red);}
   .btn-danger:hover{background:var(--red);color:#fff;}
+  /* stage name under a model's full name */
+  .stage-name{display:block;font-family:'Fraunces',serif;font-style:italic;font-weight:400;font-size:14px;color:var(--gold-light);margin:3px 0 4px;text-transform:none;letter-spacing:0;}
+  .stage-name b{font-family:'Work Sans',sans-serif;font-style:normal;font-weight:500;font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-right:8px;}
+  .stage-name--big{font-size:20px;margin:0 0 14px;}
+  .stage-name--big b{font-size:10.5px;}
+  .talent-more{display:flex;justify-content:center;margin-top:40px;}
+  .field-hint{color:var(--muted);font-size:12px;line-height:1.6;margin-top:8px;}
+  /* admin: edit a model's details */
+  .edit-form{margin-top:16px;padding:20px;border:1px solid var(--gold);background:var(--panel-2,var(--panel));flex-basis:100%;}
+  .edit-form h4{font-family:'Fraunces',serif;font-size:18px;margin-bottom:6px;}
+  .edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px;margin-top:14px;}
+  @media(max-width:640px){.edit-grid{grid-template-columns:1fr;}}
+  /* admin: section background photo slots */
+  .bg-slot{margin-top:22px;padding-top:20px;border-top:1px solid var(--line);}
+  .bg-slot h4{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold-light);font-weight:500;margin-bottom:6px;}
+  .bg-slot .hint{margin:0 0 14px;}
+  .bg-previews{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px;}
+  .bg-prev-wrap{display:flex;flex-direction:column;gap:6px;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+  .bg-prev{position:relative;isolation:isolate;overflow:hidden;border:1px solid var(--line);background:var(--black) center/cover no-repeat;}
+  .bg-prev::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,10,10,.78),rgba(10,10,10,.5));}
+  .bg-prev--d{width:240px;aspect-ratio:1.38/1;}
+  .bg-prev--m{width:112px;aspect-ratio:.89/1;}
+  .bg-prev span{position:absolute;left:10px;bottom:10px;z-index:1;font-family:'Fraunces',serif;font-style:italic;font-size:12px;color:var(--offwhite);text-transform:none;letter-spacing:0;}
+  .bg-prev--m span{font-size:10px;left:7px;bottom:7px;}
+  .bg-sliders{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;margin-bottom:14px;max-width:420px;}
+  .bg-sliders label{display:block;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+  .bg-sliders input[type=range]{width:100%;accent-color:var(--gold);}
+  .bg-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+  .bg-actions input[type=file]{display:none;}
+  .bg-status{font-size:12px;color:var(--muted);}
   .image-manager{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0;}
   .image-thumb{position:relative;width:84px;height:104px;flex-shrink:0;}
   .image-thumb img{width:100%;height:100%;object-fit:cover;border:1px solid var(--line);}
@@ -1237,6 +1307,8 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
   function setTestimonialStatus(id, status){ return apiFetch('/testimonials/admin/' + encodeURIComponent(id), { method:'PATCH', body: { status: status } }); }
   function setModelAvailability(id, availability){ return apiFetch('/models/admin/' + encodeURIComponent(id), { method:'PATCH', body: { availability: availability } }); }
   function setModelPhotos(id, photoUrls){ return apiFetch('/models/admin/' + encodeURIComponent(id), { method:'PATCH', body: { photoUrls: photoUrls } }); }
+  // Admin edits to the text a model submitted (name, stage name, contact, bio ...).
+  function updateModelDetails(id, fields){ return apiFetch('/models/admin/' + encodeURIComponent(id), { method:'PATCH', body: fields }); }
   function deleteModelAdmin(id){ return apiFetch('/models/admin/' + encodeURIComponent(id), { method:'DELETE' }); }
   function deleteBookingAdmin(id){ return apiFetch('/bookings/admin/' + encodeURIComponent(id), { method:'DELETE' }); }
   function deleteInquiryAdmin(id){ return apiFetch('/inquiries/admin/' + encodeURIComponent(id), { method:'DELETE' }); }
@@ -1304,7 +1376,11 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
       modelsBody: 'Apply to join our community and get access to shoots, brand campaigns, and a professional profile page brands can find you on.',
       brandsEyebrow: 'For brands',
       brandsTitle: 'Tell your story with the right faces',
-      brandsBody: 'Browse a curated roster of talent, or let us cast and produce a full campaign for you, start to finish.'
+      brandsBody: 'Browse a curated roster of talent, or let us cast and produce a full campaign for you, start to finish.',
+      // Optional uploaded background photos for the two panels ('' = use the built-in photo)
+      // and the focal point (0-100) that stays in view when the photo is cropped.
+      modelsImage: '', modelsPosX: 50, modelsPosY: 22,
+      brandsImage: '', brandsPosX: 50, brandsPosY: 28
     },
     portfolio: {
       eyebrow: 'Portfolio',
@@ -1376,6 +1452,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
       // merge onto the defaults rather than letting an older saved
       // contact object silently drop it.
       out.contact = Object.assign({}, DEFAULT_CONTENT.contact, out.contact || {});
+      out.brands = Object.assign({}, DEFAULT_CONTENT.brands, out.brands || {});
       lastContent = out;
       return out;
   }
@@ -1485,6 +1562,21 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
     return out;
   }
   // Makes an image link safe to drop inside a CSS url('...')
+  // Built-in photos for the For models / For brands panels (used until an upload replaces them).
+  var SPLIT_DEFAULT_IMG = {
+    models: 'https://images.unsplash.com/photo-1632765854612-9b02b6ec2b15?auto=format&fit=crop&w=1600&q=72',
+    brands: 'https://images.unsplash.com/photo-1583167463546-12676e914c0a?auto=format&fit=crop&w=1600&q=72'
+  };
+  function clampPct(v, d){ v = parseFloat(v); return isNaN(v) ? d : Math.max(0, Math.min(100, v)); }
+  // Inline style for one panel: focal point always, photo only when one was uploaded.
+  function splitStyle(b, key){
+    var d = DEFAULT_CONTENT.brands;
+    var x = clampPct(b[key+'PosX'], d[key+'PosX']), y = clampPct(b[key+'PosY'], d[key+'PosY']);
+    var st = '--pos:' + x + '% ' + y + '%;';
+    var img = b[key+'Image'];
+    if (img){ var u = "url('" + cssUrl(img) + "')"; st += '--img:' + u + ';--img-sm:' + u + ';'; }
+    return st;
+  }
   function cssUrl(u){ return String(u).replace(/\\/g,'%5C').replace(/'/g,'%27').replace(/"/g,'%22').replace(/[\r\n]/g,''); }
   function heroBgImages(){ return placeholderImages('hero', 2, 400, 500); }
 
@@ -1822,7 +1914,10 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
       ? skeletonGrid(3)
       : approved.length === 0
       ? '<p class="empty-note">No approved profiles yet. Approved models will appear here automatically.</p>'
-      : '<div class="talent-grid">' + approved.map(function(m,i){ return modelCard(m,i); }).join('') + '</div>';
+      : '<div class="talent-grid">' + approved.slice(0,3).map(function(m,i){ return modelCard(m,i); }).join('') + '</div>'
+        + (approved.length > 3
+            ? '<div class="talent-more"><a href="#/models" class="btn">View more faces ('+(approved.length-3)+' more)</a></div>'
+            : '');
 
     var heroBg = (content.hero.bgImages && content.hero.bgImages.length) ? content.hero.bgImages.slice(0,2) : heroBgImages();
 
@@ -1872,13 +1967,13 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
       + '</section>'
 
       + '<section class="split" id="brands">'
-        + '<div class="reveal">'
+        + '<div class="reveal split-card split-models" style="'+splitStyle(content.brands,'models')+'">'
           + '<div class="eyebrow">'+esc(content.brands.modelsEyebrow)+'</div>'
           + '<h2 class="serif">'+esc(content.brands.modelsTitle)+'</h2>'
           + '<p>'+esc(content.brands.modelsBody)+'</p>'
           + '<a href="#/apply" class="btn">Apply now</a>'
         + '</div>'
-        + '<div class="reveal" style="transition-delay:120ms;">'
+        + '<div class="reveal split-card split-brands" style="transition-delay:120ms;'+splitStyle(content.brands,'brands')+'">'
           + '<div class="eyebrow">'+esc(content.brands.brandsEyebrow)+'</div>'
           + '<h2 class="serif">'+esc(content.brands.brandsTitle)+'</h2>'
           + '<p>'+esc(content.brands.brandsBody)+'</p>'
@@ -2032,6 +2127,13 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
   // A model counts as available unless the admin switched them to "Not available".
   function modelIsAvailable(m){ return !m.availability || /^available$/i.test(String(m.availability).trim()); }
 
+  // Stage name shown under the full name, with a small label so it reads as "the name they go by".
+  function stageLine(m, big){
+    return m && m.stageName ? '<em class="stage-name'+(big?' stage-name--big':'')+'"><b>Stage name</b>'+esc(m.stageName)+'</em>' : '';
+  }
+  // The name a model prefers to be called: stage name if they gave one, else first name.
+  function modelFirstName(m){ return m.stageName ? m.stageName : String(m.fullName || '').split(' ')[0]; }
+
   function modelCard(m, i){
     var photo = (m.photoUrls && m.photoUrls[0]) || '';
     var staggerAttr = (typeof i === 'number') ? ' reveal" style="'+revealDelay(i,60) : '';
@@ -2039,9 +2141,9 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
       + '<div class="talent-photo ph-gradient'+(photo?' shimmer':'')+'">'
         + (photo ? '<img src="'+photo+'" alt="'+esc(m.fullName)+'" loading="lazy" class="lazy-img" onload="this.classList.add(\'loaded\');this.parentElement.classList.add(\'loaded\')">' : '')
         + (modelIsAvailable(m) ? '' : '<span class="na-tag">Not available</span>')
-        + '<div class="talent-photo-overlay"><h4 class="serif">'+esc(m.fullName)+'</h4><span>'+esc(m.category)+'</span></div>'
+        + '<div class="talent-photo-overlay"><h4 class="serif">'+esc(m.fullName)+'</h4>'+stageLine(m)+'<span>'+esc(m.category)+'</span></div>'
       + '</div>'
-      + '<div class="talent-info"><h4>'+esc(m.fullName)+'</h4><span>'+esc(m.category)+'</span></div>'
+      + '<div class="talent-info"><h4>'+esc(m.fullName)+'</h4>'+stageLine(m)+'<span>'+esc(m.category)+'</span></div>'
       + '</a>';
   }
 
@@ -2104,6 +2206,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
         + '<p class="muted" style="font-size:14px;line-height:1.7;margin-bottom:36px;">Tell us about yourself and share a few photos. All applications are reviewed before your profile goes live.</p>'
         + '<form id="applyForm">'
           + field('Full name','full_name','text',true)
+          + '<div class="field"><label>Model stage name</label><input type="text" name="stage_name" placeholder="The name you want to be called (optional)"><p class="field-hint">Shown under your full name on your profile. Leave blank if you go by your full name.</p></div>'
           + field('Email','email','email',true)
           + field('Phone / WhatsApp','phone','tel',true)
           + selectField('Category','category',['Fashion','Beauty','Lifestyle','Commercial','Fitness','Editorial'])
@@ -2156,6 +2259,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
         .then(function(photoUrls){
           return submitApplication({
             fullName: fullName,
+            stageName: form.stage_name.value.trim(),
             email: form.email.value.trim(),
             phone: form.phone.value.trim(),
             category: form.category.value,
@@ -2438,6 +2542,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
           + '</div>'
           + '<div>'
             + '<h1 class="profile-h1 serif">'+esc(model.fullName)+'</h1>'
+            + stageLine(model, true)
             + '<div class="eyebrow">'+esc(model.category)+' Model</div>'
             + '<div class="meta-row">'
               + metaItem('Height', model.height || 'N/A')
@@ -2462,10 +2567,10 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
   function renderBookingWidget(model){
     var slot = document.getElementById('bookingSlot');
     if (!modelIsAvailable(model)){
-      slot.innerHTML = '<div class="na-note"><b>Not available for booking</b>' + esc(model.fullName.split(' ')[0]) + ' is not taking bookings right now. Check back soon, or <a href="#/models">browse other talent</a>.</div>';
+      slot.innerHTML = '<div class="na-note"><b>Not available for booking</b>' + esc(modelFirstName(model)) + ' is not taking bookings right now. Check back soon, or <a href="#/models">browse other talent</a>.</div>';
       return;
     }
-    slot.innerHTML = '<button class="btn-primary" id="openBooking">Book '+esc(model.fullName.split(' ')[0])+'</button>';
+    slot.innerHTML = '<button class="btn-primary" id="openBooking">Book '+esc(modelFirstName(model))+'</button>';
     document.getElementById('openBooking').addEventListener('click', function(){
       slot.innerHTML =
         '<form class="booking-form" id="bookingForm">'
@@ -2484,7 +2589,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
         submitBtn.textContent = 'Sending…';
         submitBooking({
           modelId: model.id,
-          modelName: model.fullName,
+          modelName: model.fullName + (model.stageName ? ' ("' + model.stageName + '")' : ''),
           clientName: form.brand_name.value.trim(),
           email: form.contact_email.value.trim(),
           phone: form.contact_phone.value.trim(),
@@ -2675,14 +2780,16 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
           + '<div class="admin-list">' + (decided.length === 0
               ? '<p class="empty-note" style="text-align:left;">Nothing decided yet.</p>'
               : decided.map(function(a){
-                  return '<div class="decided-row" style="align-items:center;gap:12px;flex-wrap:wrap;"><span style="flex:1;min-width:140px;">'+esc(a.fullName)+'</span>'
+                  return '<div class="decided-row" style="align-items:center;gap:12px;flex-wrap:wrap;"><span style="flex:1;min-width:140px;">'+esc(a.fullName)+(a.stageName ? ' <em style="color:var(--gold-light);font-style:italic;">· '+esc(a.stageName)+'</em>' : '')+'</span>'
                     + '<span class="status-'+a.status+'">'+(a.status==='approved'?'approved \u00b7 live on site':a.status)+'</span>'
                     + (a.status==='approved' && a.slug ? '<a class="btn btn-small" href="#/model/'+encodeURIComponent(a.slug)+'" target="_blank" rel="noopener">View</a>' : '')
                     + (a.status==='approved'
                         ? '<button class="btn btn-small avail-btn '+(modelIsAvailable(a)?'on':'off')+'" data-avail="'+a.id+'" title="Click to switch">'+(modelIsAvailable(a)?'\u25cf Available':'\u25cf Not available')+'</button>'
                         : '')
                     + '<button class="btn btn-small" data-pmtoggle="'+a.id+'">Photos ('+((a.photoUrls||[]).length)+')</button>'
+                    + '<button class="btn btn-small" data-edittoggle="'+a.id+'">Edit details</button>'
                     + '<button class="btn btn-small btn-danger" data-modeldel="'+a.id+'">Delete profile</button>'
+                    + '<div data-editpanel="'+a.id+'" style="flex-basis:100%;"></div>'
                     + '<div data-pmpanel="'+a.id+'" style="flex-basis:100%;"></div></div>';
                 }).join('')) + '</div>';
 
@@ -2696,6 +2803,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
           btn.addEventListener('click', function(){ deleteModelLocal(btn.getAttribute('data-modeldel')); });
         });
         wirePhotoPanels(tabContent);
+        wireEditPanels(tabContent);
         Array.prototype.forEach.call(tabContent.querySelectorAll('[data-avail]'), function(btn){
           btn.addEventListener('click', function(){ toggleAvailability(btn.getAttribute('data-avail'), btn); });
         });
@@ -2787,6 +2895,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
     }
 
     /* ---- Talent photo manager: upload several, preview, reorder, save ---- */
+    var editOpen = {};   // modelId -> true while its "Edit details" form is open
     var pmWork = {};   // modelId -> { urls: [...], orig: '...', busy: bool }
     function pmDirty(w){ return JSON.stringify(w.urls) !== w.orig; }
     function pmFind(id){ return state.models.find(function(x){ return String(x.id) === String(id); }); }
@@ -2795,6 +2904,99 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
       galleryCategory = name;
       openLightbox(i);
     }
+    /* ---- Edit details: admin can change anything the model wrote, before or after approving ---- */
+    var EDIT_CATS = ['Fashion','Beauty','Lifestyle','Commercial','Fitness','Editorial'];
+    var EDIT_BODY = ['Slim','Curvy','Plus-size','Muscular','Average'];
+    function editInput(label, name, val, type){
+      return '<div class="field"><label>'+label+'</label><input type="'+(type||'text')+'" name="'+name+'" value="'+esc(val||'')+'"></div>';
+    }
+    function editSelect(label, name, opts, val){
+      var list = opts.slice();
+      if (val && list.indexOf(val) === -1) list.push(val);
+      return '<div class="field"><label>'+label+'</label><select name="'+name+'">'
+        + list.map(function(o){ return '<option'+(o===val?' selected':'')+'>'+esc(o)+'</option>'; }).join('') + '</select></div>';
+    }
+    function wireEditPanels(root){
+      Array.prototype.forEach.call(root.querySelectorAll('[data-edittoggle]'), function(btn){
+        btn.addEventListener('click', function(){
+          var id = btn.getAttribute('data-edittoggle');
+          if (editOpen[id]) delete editOpen[id]; else editOpen[id] = true;
+          paintEditPanel(root, id);
+        });
+      });
+      Object.keys(editOpen).forEach(function(id){ paintEditPanel(root, id); });
+    }
+    function paintEditPanel(root, id){
+      var host = root.querySelector('[data-editpanel="'+id+'"]');
+      if (!host) return;
+      var m = pmFind(id);
+      if (!m || !editOpen[id]){ host.innerHTML = ''; return; }
+      var canApprove = m.status !== 'approved';
+      host.innerHTML =
+        '<form class="edit-form" novalidate>'
+          + '<h4>Edit details for '+esc(m.fullName)+'</h4>'
+          + '<p class="pm-hint">Change, remove or add to anything the model wrote, then save. '+(canApprove ? 'You can save and approve in one step.' : 'Changes show on the live site straight away.')+'</p>'
+          + '<div class="edit-grid">'
+            + editInput('Full name','fullName', m.fullName)
+            + editInput('Model stage name','stageName', m.stageName)
+            + editInput('Email','email', m.email, 'email')
+            + editInput('Phone / WhatsApp','phone', m.phone)
+            + editSelect('Category','category', EDIT_CATS, m.category)
+            + editSelect('Body type','bodyType', EDIT_BODY, m.bodyType)
+            + editInput('Height','height', m.height)
+            + editInput('Based in','basedIn', m.basedIn)
+            + editInput('Instagram handle','instagram', m.instagram)
+          + '</div>'
+          + '<div class="field"><label>Bio</label><textarea name="bio" rows="5">'+esc(m.bio||'')+'</textarea></div>'
+          + '<div class="pm-bar">'
+            + '<button type="submit" class="btn-primary" data-editsave>Save changes</button>'
+            + (canApprove ? '<button type="button" class="btn-primary" data-editapprove>Save &amp; approve</button>' : '')
+            + '<button type="button" class="btn" data-editcancel>Cancel</button>'
+          + '</div>'
+        + '</form>';
+      var form = host.querySelector('form');
+      function save(thenApprove){
+        var f = form.elements;
+        var fields = {
+          fullName: f.fullName.value.trim(), stageName: f.stageName.value.trim(),
+          email: f.email.value.trim(), phone: f.phone.value.trim(),
+          category: f.category.value, bodyType: f.bodyType.value,
+          height: f.height.value.trim(), basedIn: f.basedIn.value.trim(),
+          instagram: f.instagram.value.trim(), bio: f.bio.value.trim()
+        };
+        if (!fields.fullName){ alert('Full name cannot be empty.'); return; }
+        Array.prototype.forEach.call(form.querySelectorAll('button'), function(b){ b.disabled = true; });
+        updateModelDetails(id, fields).then(function(updated){
+          // If the server sent the profile back, make sure it really kept every change.
+          if (updated && updated.fullName !== undefined){
+            var dropped = Object.keys(fields).filter(function(k){
+              return String(updated[k] == null ? '' : updated[k]) !== fields[k];
+            });
+            if (dropped.length){
+              Array.prototype.forEach.call(form.querySelectorAll('button'), function(b){ b.disabled = false; });
+              alert('The server did not save: ' + dropped.join(', ') + '.\n\nThe backend needs a small update to accept these fields. Nothing was approved.');
+              return;
+            }
+            Object.assign(m, updated);
+          } else {
+            Object.assign(m, fields);
+          }
+          dropModelCache();
+          delete editOpen[id];
+          if (thenApprove){ setStatus(id, 'approved'); }
+          else { toast('Details saved'); drawShell(); }
+        }).catch(function(err){
+          Array.prototype.forEach.call(form.querySelectorAll('button'), function(b){ b.disabled = false; });
+          if (handleAuthError(err)) return;
+          alert(err.message || 'Could not save these details.');
+        });
+      }
+      form.addEventListener('submit', function(e){ e.preventDefault(); save(false); });
+      var ap = form.querySelector('[data-editapprove]');
+      if (ap) ap.addEventListener('click', function(){ save(true); });
+      form.querySelector('[data-editcancel]').addEventListener('click', function(){ delete editOpen[id]; paintEditPanel(root, id); });
+    }
+
     function wirePhotoPanels(root){
       Array.prototype.forEach.call(root.querySelectorAll('[data-pmtoggle]'), function(btn){
         btn.addEventListener('click', function(){
@@ -2974,6 +3176,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
         + (photo ? '<img src="'+photo+'" alt="">' : '')
         + '<div class="info">'
           + '<h3>'+esc(a.fullName)+'</h3>'
+          + stageLine(a)
           + '<div class="sub">'+esc(a.category)+' · '+esc(a.bodyType)+' · '+esc(a.basedIn)+'</div>'
           + '<div class="sub">'+esc(a.email)+' · '+esc(a.phone)+'</div>'
           + (a.bio ? '<p class="bio">'+esc(a.bio)+'</p>' : '')
@@ -2982,10 +3185,12 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
               : '')
           + '<div class="app-actions">'
             + '<button class="btn" data-pmtoggle="'+a.id+'">Photos ('+((a.photoUrls||[]).length)+')</button>'
+            + '<button class="btn" data-edittoggle="'+a.id+'">Edit details</button>'
             + '<button class="btn-primary" data-approve="'+a.id+'">Approve</button>'
             + '<button class="btn" data-reject="'+a.id+'">Reject</button>'
             + '<button class="btn btn-danger" data-modeldel="'+a.id+'">Delete</button>'
           + '</div>'
+          + '<div data-editpanel="'+a.id+'"></div>'
           + '<div data-pmpanel="'+a.id+'"></div>'
         + '</div>'
       + '</div>';
@@ -3347,6 +3552,79 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
       });
     }
 
+    // One background-photo slot (key = 'models' or 'brands'): live desktop + phone preview,
+    // upload / replace, reset to the built-in photo, and a focal-point control.
+    function bgSlotHtml(b, key, label){
+      var img = b[key+'Image'], custom = !!img;
+      var src = cssUrl(img || SPLIT_DEFAULT_IMG[key]);
+      var x = clampPct(b[key+'PosX'], DEFAULT_CONTENT.brands[key+'PosX']);
+      var y = clampPct(b[key+'PosY'], DEFAULT_CONTENT.brands[key+'PosY']);
+      var bg = 'background-image:url(\''+src+'\');background-position:'+x+'% '+y+'%;';
+      return '<div class="bg-slot" data-bgslot="'+key+'">'
+        + '<h4>Background photo</h4>'
+        + '<p class="hint">'+(custom ? 'Your uploaded photo is showing on the homepage.' : 'The built-in photo is showing. Upload your own to replace it.')+' Use the sliders to choose which part of the photo stays in view when it is cropped.</p>'
+        + '<div class="bg-previews">'
+          + '<div class="bg-prev-wrap">Desktop<div class="bg-prev bg-prev--d" data-bgprev style="'+bg+'"><span>'+esc(label)+'</span></div></div>'
+          + '<div class="bg-prev-wrap">Phone<div class="bg-prev bg-prev--m" data-bgprev style="'+bg+'"><span>'+esc(label)+'</span></div></div>'
+        + '</div>'
+        + '<div class="bg-sliders">'
+          + '<div><label>Left &harr; Right</label><input type="range" min="0" max="100" value="'+x+'" data-bgx></div>'
+          + '<div><label>Top &harr; Bottom</label><input type="range" min="0" max="100" value="'+y+'" data-bgy></div>'
+        + '</div>'
+        + '<div class="bg-actions">'
+          + '<label class="btn btn-small" style="cursor:pointer;">'+(custom ? 'Replace photo' : 'Upload photo')+'<input type="file" accept="image/*" data-bgfile></label>'
+          + (custom ? '<button type="button" class="btn btn-small btn-danger" data-bgreset>Reset to default</button>' : '')
+          + '<span class="bg-status" data-bgstatus></span>'
+        + '</div>'
+      + '</div>';
+    }
+    function wireBgSlot(panel, content, key){
+      var b = content.brands;
+      var slot = panel.querySelector('[data-bgslot="'+key+'"]');
+      if (!slot) return;
+      var xIn = slot.querySelector('[data-bgx]'), yIn = slot.querySelector('[data-bgy]');
+      var status = slot.querySelector('[data-bgstatus]');
+      function paintPos(){
+        Array.prototype.forEach.call(slot.querySelectorAll('[data-bgprev]'), function(el){
+          el.style.backgroundPosition = xIn.value + '% ' + yIn.value + '%';
+        });
+      }
+      xIn.addEventListener('input', paintPos);
+      yIn.addEventListener('input', paintPos);
+      function savePos(){
+        b[key+'PosX'] = clampPct(xIn.value, 50);
+        b[key+'PosY'] = clampPct(yIn.value, 50);
+        saveContent(content);
+        toast('Photo position saved');
+      }
+      xIn.addEventListener('change', savePos);
+      yIn.addEventListener('change', savePos);
+
+      slot.querySelector('[data-bgfile]').addEventListener('change', function(e){
+        var file = (e.target.files || [])[0];
+        if (!file) return;
+        if (!/^image\//.test(file.type)){ toast('Please choose an image file'); return; }
+        status.textContent = 'Uploading\u2026';
+        // 1600px wide covers the desktop panel; the same file is reused on phones.
+        fileToCompressedDataUrl(file, 1600, 0.78).then(function(url){
+          b[key+'Image'] = url;
+          saveContent(content);
+          toast('Background photo updated');
+          renderBrandsPanel(panel, content);
+        }).catch(function(){
+          status.textContent = 'Could not read that image. Try a JPG or PNG.';
+        });
+      });
+
+      var reset = slot.querySelector('[data-bgreset]');
+      if (reset) reset.addEventListener('click', function(){
+        b[key+'Image'] = '';
+        saveContent(content);
+        toast('Back to the default photo');
+        renderBrandsPanel(panel, content);
+      });
+    }
+
     function renderBrandsPanel(panel, content){
       var b = content.brands;
       panel.innerHTML =
@@ -3358,6 +3636,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
             + '<div class="field"><label>Body</label><textarea name="modelsBody" rows="3">'+esc(b.modelsBody)+'</textarea></div>'
             + '<button type="submit" class="btn-primary">Save</button>'
           + '</form>'
+          + bgSlotHtml(b, 'models', b.modelsTitle)
         + '</div>'
         + '<div class="content-block">'
           + '<h3>For brands</h3>'
@@ -3367,7 +3646,10 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
             + '<div class="field"><label>Body</label><textarea name="brandsBody" rows="3">'+esc(b.brandsBody)+'</textarea></div>'
             + '<button type="submit" class="btn-primary">Save</button>'
           + '</form>'
+          + bgSlotHtml(b, 'brands', b.brandsTitle)
         + '</div>';
+      wireBgSlot(panel, content, 'models');
+      wireBgSlot(panel, content, 'brands');
 
       document.getElementById('brandsModelsForm').addEventListener('submit', function(e){
         e.preventDefault();
