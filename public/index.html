@@ -948,6 +948,93 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
     .gallery-modal-grid img{aspect-ratio:auto;height:auto;object-fit:contain;}
   }
   .app-card img{object-fit:contain;background:var(--panel-2);}
+
+  /* ---------- PROFILE PHOTO GALLERY (carousel) ---------- */
+  .pg{position:relative;}
+  .pg-stage{position:relative;background:var(--black);overflow:hidden;}
+  .pg-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;}
+  .pg-track::-webkit-scrollbar{display:none;}
+  .pg-slide{flex:0 0 100%;scroll-snap-align:center;scroll-snap-stop:always;aspect-ratio:3/4;position:relative;cursor:zoom-in;background:var(--black);border:none;padding:0;margin:0;display:block;}
+  .pg-slide img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .pg-arrow{
+    position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:40px;height:40px;border-radius:50%;
+    background:rgba(10,10,10,.65);border:1px solid var(--line);color:var(--offwhite);font-size:20px;line-height:1;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:border-color .2s ease,color .2s ease,background .2s ease;
+  }
+  .pg-arrow:hover{border-color:var(--gold);color:var(--gold);background:rgba(10,10,10,.85);}
+  .pg-arrow--prev{left:10px;}
+  .pg-arrow--next{right:10px;}
+  .pg-count{
+    position:absolute;right:10px;bottom:10px;z-index:2;background:rgba(10,10,10,.7);color:var(--offwhite);
+    font-size:11px;letter-spacing:1px;padding:5px 10px;border:1px solid var(--line);
+  }
+  .pg-thumbs{display:flex;gap:8px;margin-top:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+  .pg-thumbs::-webkit-scrollbar{display:none;}
+  .pg-thumb{
+    flex:0 0 64px;height:80px;padding:0;background:var(--black);cursor:pointer;
+    border:1px solid var(--line);opacity:.6;transition:opacity .2s ease,border-color .2s ease;
+  }
+  .pg-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .pg-thumb.active,.pg-thumb:hover{opacity:1;}
+  .pg-thumb.active{border-color:var(--gold);}
+  @media(max-width:699px){
+    .pg-slide img{object-fit:contain;}
+    .pg-thumb img{object-fit:contain;}
+    .pg-arrow{width:36px;height:36px;font-size:18px;}
+  }
+
+  /* ---------- ADMIN: talent photo manager ---------- */
+  .pm-strip{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;}
+  .pm-strip button{width:52px;height:66px;padding:0;border:1px solid var(--line);background:var(--black);cursor:zoom-in;}
+  .pm-strip img{width:100%;height:100%;object-fit:contain;display:block;}
+  .pm-panel{width:100%;margin-top:16px;border:1px solid var(--line);background:var(--panel-2);padding:16px;}
+  .pm-panel h4{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
+  .pm-hint{color:var(--muted);font-size:12px;line-height:1.6;margin-bottom:14px;}
+  .pm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:12px;}
+  .pm-item{position:relative;background:var(--black);border:1px solid var(--line);}
+  .pm-item.is-first{border-color:var(--gold);}
+  .pm-item img{width:100%;aspect-ratio:3/4;object-fit:contain;display:block;cursor:zoom-in;}
+  .pm-badge{position:absolute;top:6px;left:6px;background:var(--gold);color:var(--black);font-size:9.5px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:3px 7px;}
+  .pm-num{position:absolute;bottom:46px;left:6px;background:rgba(10,10,10,.75);color:var(--offwhite);font-size:10px;padding:2px 6px;}
+  .pm-rm{position:absolute;top:-8px;right:-8px;width:22px;height:22px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:13px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .pm-ctrl{display:flex;gap:4px;padding:6px;border-top:1px solid var(--line);}
+  .pm-ctrl button{flex:1;background:none;border:1px solid var(--line);color:var(--offwhite);font-size:11px;padding:6px 0;cursor:pointer;line-height:1;}
+  .pm-ctrl button:hover:not(:disabled){border-color:var(--gold);color:var(--gold);}
+  .pm-ctrl button:disabled{opacity:.3;cursor:default;}
+  .pm-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px;}
+  .pm-dirty{color:var(--gold-light);font-size:12px;}
+
+  /* ---------- ADMIN: notification badge ---------- */
+  .notif-badge{
+    display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;
+    margin-left:7px;border-radius:9px;background:var(--red);color:#fff;font-size:10.5px;font-weight:600;
+    letter-spacing:0;line-height:1;vertical-align:middle;font-family:'Work Sans',sans-serif;text-transform:none;
+  }
+  .notif-badge[hidden]{display:none;}
+  .new-tag{display:inline-block;background:var(--red);color:#fff;font-size:9.5px;font-weight:600;letter-spacing:1px;padding:2px 7px;margin-left:8px;vertical-align:middle;}
+  @media(max-width:699px){
+    /* footer: one gold line, not two (the extra .rule stacked on the ::before line) */
+    footer.site-footer .rule{display:none;}
+  }
+
+  /* ---------- MOBILE FIXES ---------- */
+  /* Model cards: the name/category is drawn twice (overlay on the photo + info strip under it).
+     Desktop swaps them on hover; touch screens have no hover, so both showed. Keep only the strip. */
+  @media (hover:none), (max-width:699px){
+    .talent-photo-overlay{display:none;}
+    .talent-photo::after{display:none;}
+    .talent-card:hover .talent-info{opacity:1;}
+  }
+  @media(max-width:699px){
+    /* browse filter chips: the -20px side margins pushed the row past the screen edge */
+    .chip-row{margin:24px 0 0;padding:0 20px 4px;}
+    /* admin tabs: scroll sideways instead of running off the screen */
+    .tab-row{overflow-x:auto;flex-wrap:nowrap;padding:0 12px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+    .tab-row::-webkit-scrollbar{display:none;}
+    .tab-btn{flex:0 0 auto;white-space:nowrap;padding:14px 14px;}
+    .admin-bar > div:last-child{flex-wrap:wrap;}
+  }
 </style>
 </head>
 <body>
@@ -967,6 +1054,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
       <a href="#portfolio">Portfolio</a>
       <a href="#about">About</a>
       <a href="#contact">Contact</a>
+      <a href="#/admin/dashboard" class="nav-admin" hidden>Admin<span class="notif-badge" data-notif hidden></span></a>
     </nav>
     <div class="nav-right">
       <a href="#/apply" class="btn nav-cta">Join as talent</a>
@@ -981,6 +1069,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
     <a href="#portfolio">Portfolio</a>
     <a href="#about">About</a>
     <a href="#contact">Contact</a>
+    <a href="#/admin/dashboard" class="nav-admin" hidden>Admin<span class="notif-badge" data-notif hidden></span></a>
     <a href="#/apply" class="btn-primary">Join as talent</a>
   </div>
 </header>
@@ -994,7 +1083,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
     <a href="#/">Home</a>
     <a href="#/models">Browse Models</a>
     <a href="#/apply">Apply</a>
-    <a href="#/admin">Admin</a>
+    <a href="#/admin">Admin<span class="notif-badge" data-notif hidden></span></a>
     <a href="mailto:vybehouse9@gmail.com">vybehouse9@gmail.com</a>
   </div>
 </footer>
@@ -1100,6 +1189,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
   function submitTestimonial(payload){ return apiFetch('/testimonials', { method:'POST', body: payload }); }
   function fetchAdminTestimonials(){ return apiFetch('/testimonials/admin/all'); }
   function setTestimonialStatus(id, status){ return apiFetch('/testimonials/admin/' + encodeURIComponent(id), { method:'PATCH', body: { status: status } }); }
+  function setModelPhotos(id, photoUrls){ return apiFetch('/models/admin/' + encodeURIComponent(id), { method:'PATCH', body: { photoUrls: photoUrls } }); }
   function deleteModelAdmin(id){ return apiFetch('/models/admin/' + encodeURIComponent(id), { method:'DELETE' }); }
   function deleteBookingAdmin(id){ return apiFetch('/bookings/admin/' + encodeURIComponent(id), { method:'DELETE' }); }
   function deleteInquiryAdmin(id){ return apiFetch('/inquiries/admin/' + encodeURIComponent(id), { method:'DELETE' }); }
@@ -1392,7 +1482,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
 
   function renderLightbox(){
     lightboxImg.src = galleryImages[lightboxIndex];
-    lightboxImg.alt = galleryCategory + ' story ' + (lightboxIndex + 1);
+    lightboxImg.alt = galleryCategory + ' ' + (lightboxIndex + 1);
     lightboxCounter.textContent = (lightboxIndex + 1) + ' / ' + galleryImages.length;
   }
   function openLightbox(index){
@@ -1417,6 +1507,18 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
   lightbox.addEventListener('click', function(e){
     if (e.target === lightbox) closeLightbox();
   });
+
+  // Swipe left/right inside the lightbox on touch screens.
+  (function(){
+    var stage = lightbox.querySelector('.lightbox-stage'), x0 = null, y0 = null;
+    stage.addEventListener('touchstart', function(e){ x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, {passive:true});
+    stage.addEventListener('touchend', function(e){
+      if (x0 === null) return;
+      var dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+      x0 = null;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3){ if (dx < 0) lightboxNext(); else lightboxPrev(); }
+    }, {passive:true});
+  })();
 
   document.addEventListener('keydown', function(e){
     if (lightbox.classList.contains('open')){
@@ -2183,6 +2285,50 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
     });
   }
 
+  // Swipe / arrows / thumbnails / tap-to-enlarge for a model's photos.
+  function wireProfileGallery(photos, name){
+    var root = document.getElementById('profileGallery');
+    if (!root || !photos.length) return;
+    var track = root.querySelector('.pg-track');
+    var count = root.querySelector('.pg-count');
+    var thumbs = root.querySelectorAll('.pg-thumb');
+    var cur = 0;
+    function goTo(i){
+      i = Math.max(0, Math.min(photos.length - 1, i));
+      track.scrollTo({ left: i * track.clientWidth, behavior: 'smooth' });
+    }
+    function mark(i){
+      cur = i;
+      if (count) count.textContent = (i + 1) + ' / ' + photos.length;
+      Array.prototype.forEach.call(thumbs, function(t, ti){
+        var on = ti === i;
+        t.classList.toggle('active', on);
+        if (on && t.parentNode.scrollTo) t.parentNode.scrollTo({ left: t.offsetLeft - t.parentNode.clientWidth / 2 + t.clientWidth / 2, behavior: 'smooth' });
+      });
+    }
+    var t = null;
+    track.addEventListener('scroll', function(){
+      clearTimeout(t);
+      t = setTimeout(function(){
+        var i = Math.round(track.scrollLeft / (track.clientWidth || 1));
+        if (i !== cur) mark(i);
+      }, 60);
+    }, {passive:true});
+    var prev = root.querySelector('.pg-arrow--prev'), next = root.querySelector('.pg-arrow--next');
+    if (prev) prev.addEventListener('click', function(){ goTo(cur === 0 ? photos.length - 1 : cur - 1); });
+    if (next) next.addEventListener('click', function(){ goTo(cur === photos.length - 1 ? 0 : cur + 1); });
+    Array.prototype.forEach.call(thumbs, function(b){
+      b.addEventListener('click', function(){ goTo(parseInt(b.getAttribute('data-pgt'), 10)); });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('.pg-slide'), function(b){
+      b.addEventListener('click', function(){
+        galleryImages = photos.slice();
+        galleryCategory = name + ' photo';
+        openLightbox(parseInt(b.getAttribute('data-pgi'), 10));
+      });
+    });
+  }
+
   function renderModelProfileWith(model){
     document.title = 'VYBE HOUSE: ' + model.fullName;
     var photos = model.photoUrls || [];
@@ -2194,8 +2340,25 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
         + '<div class="eyebrow" style="margin-bottom:28px;">Model profile</div>'
         + '<div class="profile-grid">'
           + '<div>'
-            + '<div class="profile-main-photo ph-gradient">' + (main ? '<img src="'+main+'" alt="'+esc(model.fullName)+'">' : '') + '</div>'
-            + (thumbs.length ? '<div class="profile-thumbs">' + thumbs.map(function(u){ return '<img src="'+u+'" alt="">'; }).join('') + '</div>' : '')
+            + (photos.length
+                ? '<div class="pg" id="profileGallery">'
+                    + '<div class="pg-stage">'
+                      + '<div class="pg-track">' + photos.map(function(u,i){
+                          return '<button type="button" class="pg-slide" data-pgi="'+i+'" aria-label="Open photo '+(i+1)+'"><img src="'+u+'" alt="'+esc(model.fullName)+' photo '+(i+1)+'"'+(i>0?' loading="lazy"':'')+'></button>';
+                        }).join('') + '</div>'
+                      + (photos.length > 1
+                          ? '<button type="button" class="pg-arrow pg-arrow--prev" aria-label="Previous photo">&#8249;</button>'
+                            + '<button type="button" class="pg-arrow pg-arrow--next" aria-label="Next photo">&#8250;</button>'
+                            + '<div class="pg-count">1 / '+photos.length+'</div>'
+                          : '')
+                    + '</div>'
+                    + (photos.length > 1
+                        ? '<div class="pg-thumbs">' + photos.map(function(u,i){
+                            return '<button type="button" class="pg-thumb'+(i===0?' active':'')+'" data-pgt="'+i+'" aria-label="Go to photo '+(i+1)+'"><img src="'+u+'" alt="" loading="lazy"></button>';
+                          }).join('') + '</div>'
+                        : '')
+                  + '</div>'
+                : '<div class="profile-main-photo ph-gradient"></div>')
           + '</div>'
           + '<div>'
             + '<h1 class="profile-h1 serif">'+esc(model.fullName)+'</h1>'
@@ -2213,6 +2376,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
       + '</div>';
 
     renderBookingWidget(model);
+    wireProfileGallery(photos, model.fullName);
 
     function metaItem(label,value){
       return '<div class="meta-item">'+label+'<b>'+esc(value)+'</b></div>';
@@ -2256,6 +2420,48 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
     });
   }
 
+
+  /* =========================================================
+     ADMIN NOTIFICATIONS: badge = applications waiting for a
+     decision + booking requests / project briefs not yet opened.
+     Shown on every [data-notif] element while signed in.
+     ========================================================= */
+  var SEEN_BOOKINGS_KEY = 'vh_seen_bookings', SEEN_BRIEFS_KEY = 'vh_seen_briefs';
+  function seenIds(key){ try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch(e){ return []; } }
+  function markSeenIds(key, ids){
+    try {
+      var all = seenIds(key);
+      ids.forEach(function(id){ id = String(id); if (all.indexOf(id) === -1) all.push(id); });
+      localStorage.setItem(key, JSON.stringify(all.slice(-500)));
+    } catch(e){}
+  }
+  function attentionCounts(models, bookings, inquiries){
+    var sb = seenIds(SEEN_BOOKINGS_KEY), sp = seenIds(SEEN_BRIEFS_KEY);
+    var pending = (models || []).filter(function(m){ return m.status === 'pending'; }).length;
+    var newB = (bookings || []).filter(function(b){ return sb.indexOf(String(b.id)) === -1; }).length;
+    var newP = (inquiries || []).filter(function(q){ return sp.indexOf(String(q.id)) === -1; }).length;
+    return { pending: pending, newB: newB, newP: newP, total: pending + newB + newP };
+  }
+  var lastNotifTotal = 0;
+  function setNotif(total){
+    lastNotifTotal = total;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-notif]'), function(el){
+      el.textContent = total > 99 ? '99+' : String(total);
+      el.hidden = !total;
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.nav-admin'), function(a){ a.hidden = !isAdmin(); });
+  }
+  function pollAdminNotifs(){
+    setNotif(isAdmin() ? lastNotifTotal : 0);
+    if (!isAdmin()) return;
+    Promise.all([ fetchAdminModels(), fetchAdminBookings(), fetchAdminInquiries() ]).then(function(r){
+      setNotif(attentionCounts(r[0], r[1], r[2]).total);
+    }).catch(function(){});
+  }
+  setInterval(pollAdminNotifs, 60000);
+  window.addEventListener('hashchange', function(){ setTimeout(pollAdminNotifs, 50); });
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) pollAdminNotifs(); });
+
   /* =========================================================
      ADMIN
      ========================================================= */
@@ -2284,6 +2490,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
       submitBtn.disabled = true;
       submitBtn.textContent = 'Signing in…';
       adminLogin(pass).then(function(){
+        pollAdminNotifs();
         window.location.hash = '#/admin/dashboard';
       }).catch(function(err){
         submitBtn.disabled = false;
@@ -2337,17 +2544,18 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
       var testimonials = state.testimonials.slice().sort(function(a,b){ return b.createdAt - a.createdAt; });
       var pending = models.filter(function(m){ return m.status === 'pending'; });
       var decided = models.filter(function(m){ return m.status !== 'pending'; });
+      var counts = attentionCounts(state.models, state.bookings, state.inquiries);
 
       app.innerHTML =
         '<div class="admin-wrap">'
           + '<div class="admin-bar">'
-            + '<div><div class="eyebrow">Admin</div><h1 class="serif" style="font-size:28px;margin-top:6px;">Dashboard</h1></div>'
+            + '<div><div class="eyebrow">Admin<span class="notif-badge" data-notif hidden></span></div><h1 class="serif" style="font-size:28px;margin-top:6px;">Dashboard</h1></div>'
             + '<div style="display:flex;gap:10px;"><button class="btn" id="changePassBtn">Change password</button><button class="btn" id="signOutBtn">Sign out</button></div>'
           + '</div>'
           + '<div class="tab-row">'
-            + '<button class="tab-btn'+(activeTab==='applications'?' active':'')+'" data-tab="applications">Applications</button>'
-            + '<button class="tab-btn'+(activeTab==='bookings'?' active':'')+'" data-tab="bookings">Booking requests ('+bookings.length+')</button>'
-            + '<button class="tab-btn'+(activeTab==='projects'?' active':'')+'" data-tab="projects">Project briefs ('+inquiries.length+')</button>'
+            + '<button class="tab-btn'+(activeTab==='applications'?' active':'')+'" data-tab="applications">Applications'+(counts.pending?'<span class="notif-badge" data-tabbadge="applications">'+counts.pending+'</span>':'')+'</button>'
+            + '<button class="tab-btn'+(activeTab==='bookings'?' active':'')+'" data-tab="bookings">Booking requests ('+bookings.length+')'+(counts.newB?'<span class="notif-badge" data-tabbadge="bookings">'+counts.newB+'</span>':'')+'</button>'
+            + '<button class="tab-btn'+(activeTab==='projects'?' active':'')+'" data-tab="projects">Project briefs ('+inquiries.length+')'+(counts.newP?'<span class="notif-badge" data-tabbadge="projects">'+counts.newP+'</span>':'')+'</button>'
             + '<button class="tab-btn'+(activeTab==='testimonials'?' active':'')+'" data-tab="testimonials">Testimonials ('+testimonials.length+')</button>'
             + '<button class="tab-btn'+(activeTab==='content'?' active':'')+'" data-tab="content">Site content</button>'
           + '</div>'
@@ -2356,6 +2564,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
 
       document.getElementById('signOutBtn').addEventListener('click', function(){
         clearToken();
+        setNotif(0);
         window.location.hash = '#/admin';
       });
       document.getElementById('changePassBtn').addEventListener('click', function(){
@@ -2389,7 +2598,9 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
                   return '<div class="decided-row" style="align-items:center;gap:12px;flex-wrap:wrap;"><span style="flex:1;min-width:140px;">'+esc(a.fullName)+'</span>'
                     + '<span class="status-'+a.status+'">'+(a.status==='approved'?'approved \u00b7 live on site':a.status)+'</span>'
                     + (a.status==='approved' && a.slug ? '<a class="btn btn-small" href="#/model/'+encodeURIComponent(a.slug)+'" target="_blank" rel="noopener">View</a>' : '')
-                    + '<button class="btn btn-small btn-danger" data-modeldel="'+a.id+'">Delete profile</button></div>';
+                    + '<button class="btn btn-small" data-pmtoggle="'+a.id+'">Photos ('+((a.photoUrls||[]).length)+')</button>'
+                    + '<button class="btn btn-small btn-danger" data-modeldel="'+a.id+'">Delete profile</button>'
+                    + '<div data-pmpanel="'+a.id+'" style="flex-basis:100%;"></div></div>';
                 }).join('')) + '</div>';
 
         Array.prototype.forEach.call(tabContent.querySelectorAll('[data-approve]'), function(btn){
@@ -2401,12 +2612,14 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
         Array.prototype.forEach.call(tabContent.querySelectorAll('[data-modeldel]'), function(btn){
           btn.addEventListener('click', function(){ deleteModelLocal(btn.getAttribute('data-modeldel')); });
         });
+        wirePhotoPanels(tabContent);
       } else if (activeTab === 'bookings'){
+        var unseenB = seenIds(SEEN_BOOKINGS_KEY);
         tabContent.innerHTML = '<div class="admin-list">' + (bookings.length === 0
           ? '<p class="empty-note" style="text-align:left;">No booking requests yet.</p>'
           : bookings.map(function(b){
               return '<div class="booking-row">'
-                + '<div class="top"><span>For '+esc(b.modelName)+'</span><span>'+new Date(b.createdAt).toLocaleDateString()+'</span></div>'
+                + '<div class="top"><span>For '+esc(b.modelName)+(unseenB.indexOf(String(b.id))===-1?'<span class="new-tag">NEW</span>':'')+'</span><span>'+new Date(b.createdAt).toLocaleDateString()+'</span></div>'
                 + '<b>'+esc(b.clientName)+'</b><br>'
                 + esc(b.email) + (b.phone ? ' · '+esc(b.phone) : '') + '<br>'
                 + (b.message ? '<span class="muted">'+esc(b.message)+'</span>' : '')
@@ -2414,12 +2627,15 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
               + '</div>';
             }).join('')) + '</div>';
         wireRowDelete(tabContent, 'data-bookdel', 'booking request', deleteBookingAdmin, 'bookings');
+        markSeenIds(SEEN_BOOKINGS_KEY, bookings.map(function(b){ return b.id; }));
+        clearTabBadge('bookings');
       } else if (activeTab === 'projects'){
+        var unseenP = seenIds(SEEN_BRIEFS_KEY);
         tabContent.innerHTML = '<div class="admin-list">' + (inquiries.length === 0
           ? '<p class="empty-note" style="text-align:left;">No project briefs yet.</p>'
           : inquiries.map(function(p){
               return '<div class="booking-row">'
-                + '<div class="top"><span>'+esc(p.projectType || 'Project inquiry')+'</span><span>'+new Date(p.createdAt).toLocaleDateString()+'</span></div>'
+                + '<div class="top"><span>'+esc(p.projectType || 'Project inquiry')+(unseenP.indexOf(String(p.id))===-1?'<span class="new-tag">NEW</span>':'')+'</span><span>'+new Date(p.createdAt).toLocaleDateString()+'</span></div>'
                 + '<b>'+esc(p.brandName)+'</b>, '+esc(p.contactName)+'<br>'
                 + esc(p.email) + (p.phone ? ' · '+esc(p.phone) : '') + '<br>'
                 + (p.budget ? '<span class="muted">Budget: '+esc(p.budget)+'</span><br>' : '')
@@ -2429,6 +2645,8 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
               + '</div>';
             }).join('')) + '</div>';
         wireRowDelete(tabContent, 'data-projdel', 'project brief', deleteInquiryAdmin, 'inquiries');
+        markSeenIds(SEEN_BRIEFS_KEY, inquiries.map(function(q){ return q.id; }));
+        clearTabBadge('projects');
       } else if (activeTab === 'testimonials'){
         tabContent.innerHTML =
           '<p class="muted" style="font-size:12.5px;margin:-6px 0 20px;">These go live the moment someone submits them. Hide or delete anything that shouldn\'t be public.</p>'
@@ -2471,6 +2689,134 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
       } else {
         renderContentTab(tabContent);
       }
+      syncBadges();
+    }
+
+    function syncBadges(){
+      setNotif(attentionCounts(state.models, state.bookings, state.inquiries).total);
+    }
+    function clearTabBadge(name){
+      var el = document.querySelector('[data-tabbadge="'+name+'"]');
+      if (el) el.remove();
+    }
+
+    /* ---- Talent photo manager: upload several, preview, reorder, save ---- */
+    var pmWork = {};   // modelId -> { urls: [...], orig: '...', busy: bool }
+    function pmDirty(w){ return JSON.stringify(w.urls) !== w.orig; }
+    function pmFind(id){ return state.models.find(function(x){ return String(x.id) === String(id); }); }
+    function pmEnlarge(urls, i, name){
+      galleryImages = urls.slice();
+      galleryCategory = name;
+      openLightbox(i);
+    }
+    function wirePhotoPanels(root){
+      Array.prototype.forEach.call(root.querySelectorAll('[data-pmtoggle]'), function(btn){
+        btn.addEventListener('click', function(){
+          var id = btn.getAttribute('data-pmtoggle'), m = pmFind(id);
+          if (!m) return;
+          if (pmWork[id]){
+            if (pmDirty(pmWork[id]) && !confirm('Close without saving your photo changes?')) return;
+            delete pmWork[id];
+          } else {
+            pmWork[id] = { urls: (m.photoUrls || []).slice(), orig: JSON.stringify(m.photoUrls || []), busy: false };
+          }
+          paintPhotoPanel(root, id);
+        });
+      });
+      Array.prototype.forEach.call(root.querySelectorAll('[data-pmview]'), function(btn){
+        btn.addEventListener('click', function(){
+          var m = pmFind(btn.getAttribute('data-pmview'));
+          if (m) pmEnlarge(m.photoUrls || [], parseInt(btn.getAttribute('data-pmi'), 10), m.fullName);
+        });
+      });
+      Object.keys(pmWork).forEach(function(id){ paintPhotoPanel(root, id); });
+    }
+    function paintPhotoPanel(root, id){
+      var host = root.querySelector('[data-pmpanel="'+id+'"]');
+      if (!host) return;
+      var w = pmWork[id], m = pmFind(id);
+      if (!w || !m){ host.innerHTML = ''; return; }
+      host.innerHTML =
+        '<div class="pm-panel">'
+          + '<h4>Photos for '+esc(m.fullName)+'</h4>'
+          + '<p class="pm-hint">The first photo is the cover on the roster. Use the arrows or "Make first" to reorder, tap a picture to enlarge, then press Save photos.</p>'
+          + (w.urls.length
+              ? '<div class="pm-grid">' + w.urls.map(function(u,i){
+                  return '<div class="pm-item'+(i===0?' is-first':'')+'">'
+                    + '<img src="'+u+'" alt="Photo '+(i+1)+'" data-pmz="'+i+'">'
+                    + (i===0 ? '<span class="pm-badge">Cover</span>' : '<span class="pm-num">'+(i+1)+'</span>')
+                    + '<button type="button" class="pm-rm" data-pmrm="'+i+'" title="Remove photo">&times;</button>'
+                    + '<div class="pm-ctrl">'
+                      + '<button type="button" data-pmleft="'+i+'" title="Move earlier"'+(i===0?' disabled':'')+'>&larr;</button>'
+                      + '<button type="button" data-pmfirst="'+i+'" title="Make first"'+(i===0?' disabled':'')+'>1st</button>'
+                      + '<button type="button" data-pmright="'+i+'" title="Move later"'+(i===w.urls.length-1?' disabled':'')+'>&rarr;</button>'
+                    + '</div>'
+                  + '</div>';
+                }).join('') + '</div>'
+              : '<p class="empty-note" style="text-align:left;">No photos yet.</p>')
+          + '<div class="field" style="margin-top:16px;"><label>Add photos (you can pick several)</label><input type="file" accept="image/*" multiple data-pmup></div>'
+          + '<div class="pm-bar">'
+            + '<button type="button" class="btn-primary" data-pmsave'+(w.busy||!pmDirty(w)?' disabled':'')+'>'+(w.busy?'Working…':'Save photos')+'</button>'
+            + '<button type="button" class="btn" data-pmcancel>Close</button>'
+            + (pmDirty(w) ? '<span class="pm-dirty">Unsaved changes</span>' : '')
+          + '</div>'
+        + '</div>';
+
+      function again(){ paintPhotoPanel(root, id); }
+      function move(from, to){
+        if (to < 0 || to >= w.urls.length) return;
+        var it = w.urls.splice(from, 1)[0];
+        w.urls.splice(to, 0, it);
+        again();
+      }
+      function each(sel, fn){ Array.prototype.forEach.call(host.querySelectorAll(sel), fn); }
+      each('[data-pmz]', function(el){ el.addEventListener('click', function(){ pmEnlarge(w.urls, parseInt(el.getAttribute('data-pmz'),10), m.fullName); }); });
+      each('[data-pmleft]', function(el){ el.addEventListener('click', function(){ var i = parseInt(el.getAttribute('data-pmleft'),10); move(i, i-1); }); });
+      each('[data-pmright]', function(el){ el.addEventListener('click', function(){ var i = parseInt(el.getAttribute('data-pmright'),10); move(i, i+1); }); });
+      each('[data-pmfirst]', function(el){ el.addEventListener('click', function(){ move(parseInt(el.getAttribute('data-pmfirst'),10), 0); }); });
+      each('[data-pmrm]', function(el){
+        el.addEventListener('click', function(){
+          if (!confirm('Remove this photo?')) return;
+          w.urls.splice(parseInt(el.getAttribute('data-pmrm'),10), 1);
+          again();
+        });
+      });
+      var up = host.querySelector('[data-pmup]');
+      up.addEventListener('change', function(e){
+        var files = Array.prototype.slice.call(e.target.files || []);
+        if (!files.length) return;
+        var room = 12 - w.urls.length;
+        if (room <= 0){ alert('A profile can have up to 12 photos. Remove one first.'); return; }
+        if (files.length > room){ alert('Only the first ' + room + ' photo(s) were added (max 12 per profile).'); files = files.slice(0, room); }
+        w.busy = true; again();
+        Promise.all(files.map(function(f){ return fileToCompressedDataUrl(f, 1400, 0.8); })).then(function(urls){
+          w.urls = w.urls.concat(urls);
+          w.busy = false; again();
+          toast(urls.length + ' photo(s) added. Review, reorder, then Save photos');
+        }).catch(function(){
+          w.busy = false; again();
+          alert('One of those files could not be read as an image.');
+        });
+      });
+      host.querySelector('[data-pmcancel]').addEventListener('click', function(){
+        if (pmDirty(w) && !confirm('Close without saving your photo changes?')) return;
+        delete pmWork[id]; again();
+      });
+      host.querySelector('[data-pmsave]').addEventListener('click', function(){
+        if (!w.urls.length && !confirm('This profile will have no photos. Continue?')) return;
+        w.busy = true; again();
+        setModelPhotos(id, w.urls).then(function(updated){
+          m.photoUrls = (updated && updated.photoUrls) ? updated.photoUrls : w.urls.slice();
+          dropModelCache();
+          delete pmWork[id];
+          toast('Photos saved');
+          drawShell();
+        }).catch(function(err){
+          w.busy = false; again();
+          if (handleAuthError(err)) return;
+          alert(err.message || 'Could not save these photos.');
+        });
+      });
     }
 
     function deleteModelLocal(id){
@@ -2528,11 +2874,16 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
           + '<div class="sub">'+esc(a.category)+' · '+esc(a.bodyType)+' · '+esc(a.basedIn)+'</div>'
           + '<div class="sub">'+esc(a.email)+' · '+esc(a.phone)+'</div>'
           + (a.bio ? '<p class="bio">'+esc(a.bio)+'</p>' : '')
+          + ((a.photoUrls||[]).length > 1
+              ? '<div class="pm-strip">' + a.photoUrls.map(function(u,i){ return '<button type="button" data-pmview="'+a.id+'" data-pmi="'+i+'" title="View photo '+(i+1)+'"><img src="'+u+'" alt=""></button>'; }).join('') + '</div>'
+              : '')
           + '<div class="app-actions">'
+            + '<button class="btn" data-pmtoggle="'+a.id+'">Photos ('+((a.photoUrls||[]).length)+')</button>'
             + '<button class="btn-primary" data-approve="'+a.id+'">Approve</button>'
             + '<button class="btn" data-reject="'+a.id+'">Reject</button>'
             + '<button class="btn btn-danger" data-modeldel="'+a.id+'">Delete</button>'
           + '</div>'
+          + '<div data-pmpanel="'+a.id+'"></div>'
         + '</div>'
       + '</div>';
     }
@@ -3141,6 +3492,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
      INIT
      ========================================================= */
   route();
+  pollAdminNotifs();
 })();
 </script>
 </body>
