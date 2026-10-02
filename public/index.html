@@ -943,7 +943,6 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
     .portfolio-item{background:var(--black);}
     .portfolio-item img{object-fit:contain;}
     .portfolio-item:hover img{transform:none;}
-    .hero-tag--img{background-size:100% 100%,contain !important;background-color:var(--black);}
     .gallery-modal-grid{grid-template-columns:1fr;}
     .gallery-modal-grid img{aspect-ratio:auto;height:auto;object-fit:contain;}
   }
@@ -1055,6 +1054,25 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
   }
   .na-note b{display:block;color:var(--red);font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
   .na-note a{color:var(--gold);text-decoration:underline;}
+
+  /* ---------- HERO PICTURES: show the WHOLE photo (group shots keep every face) ---------- */
+  .hero-bg-cell{position:relative;overflow:hidden;min-width:0;}
+  .hero-bg-cell::before{
+    content:'';position:absolute;inset:-24px;background:var(--bg) center/cover no-repeat;
+    filter:blur(26px) grayscale(25%) brightness(.8);opacity:.5;
+  }
+  .hero-bg .hero-bg-cell img{position:relative;width:100%;height:100%;object-fit:contain;}
+  .hero-tag--img{background:var(--black);}
+  .hero-tag--img::before{
+    content:'';position:absolute;inset:-16px;z-index:0;background:var(--bg) center/cover no-repeat;
+    filter:blur(22px) brightness(.55);
+  }
+  .hero-tag--img img{position:absolute;inset:0;z-index:1;width:100%;height:100%;object-fit:contain;display:block;}
+  .hero-tag--img::after{
+    content:'';position:absolute;inset:0;z-index:2;pointer-events:none;
+    background:linear-gradient(180deg,rgba(10,10,10,0) 70%,rgba(10,10,10,.75) 100%);
+  }
+  .hero-tag--img span{z-index:3;text-shadow:0 1px 6px rgba(0,0,0,.8);}
 </style>
 </head>
 <body>
@@ -1458,6 +1476,8 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
     for (var k = 0; k < count; k++) out.push(url);
     return out;
   }
+  // Makes an image link safe to drop inside a CSS url('...')
+  function cssUrl(u){ return String(u).replace(/\\/g,'%5C').replace(/'/g,'%27').replace(/"/g,'%22').replace(/[\r\n]/g,''); }
   function heroBgImages(){ return placeholderImages('hero', 2, 400, 500); }
 
   /* =========================================================
@@ -1801,7 +1821,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
     app.innerHTML =
       '<section class="hero">'
         + '<div class="hero-bg">' + heroBg.map(function(src){
-            return '<img src="'+src+'" alt="" loading="lazy">';
+            return '<div class="hero-bg-cell" style="--bg:url(\''+cssUrl(src)+'\')"><img src="'+src+'" alt=""></div>';
           }).join('') + '</div>'
         + '<div class="hero-content">'
           + '<div class="hero-main">'
@@ -1811,10 +1831,10 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
             + '<div class="hero-actions"><a href="#/apply" class="btn-primary">Apply as a model</a><a href="#brands" class="btn">Work with us</a></div>'
           + '</div>'
           + '<div class="hero-visual"><div class="hero-tags">' + (content.hero.tags||[]).map(function(t){
-              var bg = t.image
-                ? ' style="background:linear-gradient(180deg,rgba(10,10,10,.05) 45%,rgba(10,10,10,.85) 100%), url(\''+t.image+'\') center/cover no-repeat;"'
-                : '';
-              return '<div class="hero-tag'+(t.image?' hero-tag--img':' ph-gradient')+'"'+bg+'><span>'+esc(t.label)+'</span></div>';
+              if (t.image){
+                return '<div class="hero-tag hero-tag--img" style="--bg:url(\''+cssUrl(t.image)+'\')"><img src="'+t.image+'" alt="'+esc(t.label)+'"><span>'+esc(t.label)+'</span></div>';
+              }
+              return '<div class="hero-tag ph-gradient"><span>'+esc(t.label)+'</span></div>';
             }).join('') + '</div></div>'
         + '</div>'
       + '</section>'
