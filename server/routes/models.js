@@ -73,6 +73,7 @@ router.post('/', async (req, res) => {
     slug: slugify(b.fullName),
     createdAt: Date.now(),
     fullName: String(b.fullName).trim(),
+    stageName: String(b.stageName || '').trim(),
     email: String(b.email || '').trim(),
     phone: String(b.phone || '').trim(),
     category: b.category || '',
@@ -86,11 +87,12 @@ router.post('/', async (req, res) => {
     availability: 'Available'
   };
   await db.prepare(
-    `INSERT INTO models (id, slug, "createdAt", "fullName", email, phone, category, "bodyType", height, "basedIn", bio, instagram, "photoUrls", status, availability)
-     VALUES (@id, @slug, @createdAt, @fullName, @email, @phone, @category, @bodyType, @height, @basedIn, @bio, @instagram, @photoUrls, @status, @availability)`
+    `INSERT INTO models (id, slug, "createdAt", "fullName", "stageName", email, phone, category, "bodyType", height, "basedIn", bio, instagram, "photoUrls", status, availability)
+     VALUES (@id, @slug, @createdAt, @fullName, @stageName, @email, @phone, @category, @bodyType, @height, @basedIn, @bio, @instagram, @photoUrls, @status, @availability)`
   ).run(model);
   notifyAdmin('New model application: ' + model.fullName, [
     'Name: ' + model.fullName,
+    'Stage name: ' + (model.stageName || '-'),
     'Email: ' + model.email,
     'Phone: ' + model.phone,
     'Category: ' + model.category,
@@ -113,7 +115,7 @@ router.patch('/admin/:id', requireAdmin, async (req, res) => {
   if (!existing) return res.status(404).json({ error: 'Not found' });
 
   const allowed = [
-    'fullName', 'email', 'phone', 'category', 'bodyType', 'height',
+    'fullName', 'stageName', 'email', 'phone', 'category', 'bodyType', 'height',
     'basedIn', 'bio', 'instagram', 'status', 'availability'
   ];
   const updates = {};
