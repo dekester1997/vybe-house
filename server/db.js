@@ -91,6 +91,7 @@ async function init() {
       slug TEXT UNIQUE NOT NULL,
       "createdAt" BIGINT NOT NULL,
       "fullName" TEXT NOT NULL,
+      "stageName" TEXT,
       email TEXT,
       phone TEXT,
       category TEXT,
@@ -152,6 +153,9 @@ async function init() {
       "passwordHash" TEXT NOT NULL
     );
   `);
+
+  // Existing databases: add the stage name column (no-op if it is already there).
+  await pool.query('ALTER TABLE models ADD COLUMN IF NOT EXISTS "stageName" TEXT');
 
   await pool.query('CREATE INDEX IF NOT EXISTS idx_models_status ON models (status, "createdAt" DESC)');
   await pool.query('CREATE INDEX IF NOT EXISTS idx_testimonials_status ON testimonials (status, "createdAt" DESC)');
