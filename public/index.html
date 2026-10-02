@@ -209,11 +209,9 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
   }
   .hero-bg-cell{position:relative;margin:0;min-width:0;}
   .hero-bg-cell img{display:block;width:100%;height:auto;}
-  /* light scrim only so the headline stays readable over the photos */
-  .hero-bg::after{
-    content:'';position:absolute;inset:0;pointer-events:none;
-    background:linear-gradient(180deg,rgba(10,10,10,.5) 0%,rgba(10,10,10,.42) 100%);
-  }
+  /* Photo strength: 1st photo 90%, 2nd photo 50% - lets the headline show through (no extra dark overlay) */
+  .hero-bg-cell:nth-child(1) img{opacity:.9;}
+  .hero-bg-cell:nth-child(2) img{opacity:.5;}
   @media(min-width:700px){
     .hero-bg{flex-direction:row;align-items:flex-start;}
     /* widths proportional to each photo's ratio => both panels share one height and fill the row */
@@ -1068,6 +1066,14 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
     background:linear-gradient(180deg,rgba(10,10,10,0) 70%,rgba(10,10,10,.75) 100%);
   }
   .hero-tag--img span{z-index:3;text-shadow:0 1px 6px rgba(0,0,0,.8);}
+
+  /* Computer view: only the TWO photo panels, with the headline text over them.
+     The category tile grid (Fashion / Beauty / ...) is hidden here so it can't form a third panel over the photos. */
+  @media(min-width:900px){
+    .hero-content{display:block;text-align:left;}
+    .hero-main{max-width:760px;margin:0;}
+    .hero-visual{display:none;}
+  }
 </style>
 </head>
 <body>
