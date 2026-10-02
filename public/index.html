@@ -1075,6 +1075,12 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
   }
   .hero-tag--img span{z-index:3;text-shadow:0 1px 6px rgba(0,0,0,.8);}
 
+  /* Phone view: stagger the four cards like the computer view (every 2nd card drops down) */
+  @media(max-width:699px){
+    .hero-tags{padding-bottom:28px;}
+    .hero-tag:nth-child(2n){transform:translateY(28px);}
+    .hero-tag:nth-child(2n):hover{transform:translateY(22px) scale(1.02);}
+  }
 </style>
 </head>
 <body>
