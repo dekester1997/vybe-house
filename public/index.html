@@ -197,23 +197,25 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
     position:relative;overflow:hidden;
     padding:96px 24px 72px;text-align:center;border-bottom:1px solid var(--line);
   }
-  /* Hero photos: two panels that show each uploaded image COMPLETE (no crop, no zoom, no blur).
-     Each panel takes the photo's own aspect ratio (--ar, set from the real image size). */
   .hero-bg{
-    position:relative;z-index:1;
-    display:flex;flex-direction:column;gap:2px;
-    max-width:1280px;margin:44px auto 0;
+    position:absolute;inset:0;z-index:0;
+    display:grid;grid-template-columns:repeat(2,1fr);
   }
-  .hero-bg-cell{position:relative;margin:0;min-width:0;background:var(--black);}
-  .hero-bg-cell img{display:block;width:100%;height:auto;}
-  @media(min-width:700px){
-    .hero-bg{
-      flex-direction:row;align-items:flex-start;margin-top:56px;
-      /* keep two tall portraits from becoming enormous on big screens */
-      max-width:min(1280px, calc(78vh * var(--sum,1.6)));
-    }
-    /* widths proportional to each photo's ratio => both panels share one height and fill the row */
-    .hero-bg-cell{flex:var(--ar,.8) 1 0;}
+  .hero-bg img{
+    width:100%;height:100%;object-fit:cover;
+    filter:grayscale(25%) contrast(1.05) brightness(.85);
+    opacity:.5;
+    animation:heroKenBurns 24s ease-in-out infinite alternate;
+  }
+  .hero-bg img:nth-child(even){animation-delay:-8s;}
+  .hero-bg img:nth-child(3n){animation-delay:-16s;}
+  @keyframes heroKenBurns{
+    0%{transform:scale(1);}
+    100%{transform:scale(1.08);}
+  }
+  .hero-bg::after{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(10,10,10,.45) 0%,rgba(90,45,45,.35) 55%,rgba(10,10,10,.85) 75%,var(--black) 96%);
   }
   .hero-content{position:relative;z-index:1;max-width:1280px;margin:0 auto;}
   .hero-main{max-width:640px;margin:0 auto;}
@@ -251,6 +253,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
   .hero-visual{animation-delay:.58s;}
   @keyframes heroRise{to{opacity:1;transform:none;}}
   @media(prefers-reduced-motion:reduce){
+    .hero-bg img{animation:none;}
     .hero-main .eyebrow,.hero-main h1,.hero-main p,.hero-main .hero-actions,.hero-visual{animation:none;opacity:1;transform:none;}
   }
   @media(min-width:900px){
@@ -1053,6 +1056,12 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
   .na-note a{color:var(--gold);text-decoration:underline;}
 
   /* ---------- HERO PICTURES: show the WHOLE photo (group shots keep every face) ---------- */
+  .hero-bg-cell{position:relative;overflow:hidden;min-width:0;}
+  .hero-bg-cell::before{
+    content:'';position:absolute;inset:-24px;background:var(--bg) center/cover no-repeat;
+    filter:blur(26px) grayscale(25%) brightness(.8);opacity:.5;
+  }
+  .hero-bg .hero-bg-cell img{position:relative;width:100%;height:100%;object-fit:contain;}
   .hero-tag--img{background:var(--black);}
   .hero-tag--img::before{
     content:'';position:absolute;inset:-16px;z-index:0;background:var(--bg) center/cover no-repeat;
@@ -1811,6 +1820,9 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
 
     app.innerHTML =
       '<section class="hero">'
+        + '<div class="hero-bg">' + heroBg.map(function(src){
+            return '<div class="hero-bg-cell" style="--bg:url(\''+cssUrl(src)+'\')"><img src="'+src+'" alt=""></div>';
+          }).join('') + '</div>'
         + '<div class="hero-content">'
           + '<div class="hero-main">'
             + '<div class="eyebrow">'+esc(content.hero.eyebrow)+'</div>'
@@ -1825,9 +1837,6 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
               return '<div class="hero-tag ph-gradient"><span>'+esc(t.label)+'</span></div>';
             }).join('') + '</div></div>'
         + '</div>'
-        + '<div class="hero-bg">' + heroBg.map(function(src){
-            return '<figure class="hero-bg-cell"><img src="'+src+'" alt="Vybe House"></figure>';
-          }).join('') + '</div>'
       + '</section>'
 
       + '<div class="stats-bar">'
@@ -1967,29 +1976,6 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
           + '</div>'
         + '</div>'
       + '</section>';
-
-    // Hero photos: give each panel its photo's true aspect ratio so the full image fills it
-    (function(){
-      var band = app.querySelector('.hero-bg');
-      if (!band) return;
-      var cells = Array.prototype.slice.call(band.querySelectorAll('.hero-bg-cell'));
-      function sync(){
-        var sum = 0;
-        cells.forEach(function(cell){
-          var im = cell.querySelector('img');
-          var ar = (im && im.naturalWidth && im.naturalHeight) ? im.naturalWidth / im.naturalHeight : 0.8;
-          cell.style.setProperty('--ar', ar);
-          sum += ar;
-        });
-        band.style.setProperty('--sum', sum || 1.6);
-      }
-      cells.forEach(function(cell){
-        var im = cell.querySelector('img');
-        if (!im) return;
-        if (!im.complete) im.addEventListener('load', sync);
-      });
-      sync();
-    })();
 
     Array.prototype.forEach.call(app.querySelectorAll('.portfolio-item'), function(btn){
       btn.addEventListener('click', function(){
