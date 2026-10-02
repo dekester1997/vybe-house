@@ -194,30 +194,32 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
 
   /* ---------- HERO ---------- */
   .hero{
-    position:relative;overflow:hidden;
-    padding:96px 24px 72px;text-align:center;border-bottom:1px solid var(--line);
+    --hpt:96px;--hpx:24px;--hpb:72px;
+    position:relative;overflow:hidden;display:grid;
+    padding:var(--hpt) var(--hpx) var(--hpb);text-align:center;border-bottom:1px solid var(--line);
   }
+  /* Hero photos: the two grid panels sit BEHIND the hero text, edge to edge.
+     Each panel takes its photo's own aspect ratio (--ar, set from the real image size),
+     so the whole picture fills its panel - no crop, no zoom, no blurred copy. */
+  .hero-bg,.hero-content{grid-area:1/1;}
   .hero-bg{
-    position:absolute;inset:0;z-index:0;
-    display:grid;grid-template-columns:repeat(2,1fr);
+    position:relative;z-index:0;align-self:start;
+    margin:calc(var(--hpt) * -1) calc(var(--hpx) * -1) calc(var(--hpb) * -1);
+    display:flex;flex-direction:column;gap:2px;
   }
-  .hero-bg img{
-    width:100%;height:100%;object-fit:cover;
-    filter:grayscale(25%) contrast(1.05) brightness(.85);
-    opacity:.5;
-    animation:heroKenBurns 24s ease-in-out infinite alternate;
-  }
-  .hero-bg img:nth-child(even){animation-delay:-8s;}
-  .hero-bg img:nth-child(3n){animation-delay:-16s;}
-  @keyframes heroKenBurns{
-    0%{transform:scale(1);}
-    100%{transform:scale(1.08);}
-  }
+  .hero-bg-cell{position:relative;margin:0;min-width:0;}
+  .hero-bg-cell img{display:block;width:100%;height:auto;}
+  /* light scrim only so the headline stays readable over the photos */
   .hero-bg::after{
-    content:'';position:absolute;inset:0;
-    background:linear-gradient(180deg,rgba(10,10,10,.45) 0%,rgba(90,45,45,.35) 55%,rgba(10,10,10,.85) 75%,var(--black) 96%);
+    content:'';position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(180deg,rgba(10,10,10,.5) 0%,rgba(10,10,10,.42) 100%);
   }
-  .hero-content{position:relative;z-index:1;max-width:1280px;margin:0 auto;}
+  @media(min-width:700px){
+    .hero-bg{flex-direction:row;align-items:flex-start;}
+    /* widths proportional to each photo's ratio => both panels share one height and fill the row */
+    .hero-bg-cell{flex:var(--ar,.8) 1 0;}
+  }
+  .hero-content{position:relative;z-index:1;width:100%;max-width:1280px;margin:0 auto;justify-self:center;}
   .hero-main{max-width:640px;margin:0 auto;}
   .hero h1{font-size:clamp(44px,9.5vw,96px);font-weight:340;letter-spacing:-.01em;line-height:1.04;margin:20px auto 0;}
   .hero h1 .gold{color:var(--gold);}
@@ -253,7 +255,6 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
   .hero-visual{animation-delay:.58s;}
   @keyframes heroRise{to{opacity:1;transform:none;}}
   @media(prefers-reduced-motion:reduce){
-    .hero-bg img{animation:none;}
     .hero-main .eyebrow,.hero-main h1,.hero-main p,.hero-main .hero-actions,.hero-visual{animation:none;opacity:1;transform:none;}
   }
   @media(min-width:900px){
@@ -267,7 +268,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
     .hero-tag:nth-child(2n):hover{transform:translateY(22px) scale(1.02);}
   }
   @media(min-width:700px){
-    .hero{padding:132px 40px 96px;}
+    .hero{--hpt:132px;--hpx:40px;--hpb:96px;}
     .hero-tags{grid-template-columns:repeat(4,1fr);}
   }
   @media(min-width:900px){
@@ -818,7 +819,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
     .mobile-menu .btn-primary{display:flex;justify-content:center;}
 
     /* ---- hero ---- */
-    .hero{padding:64px 20px 56px;}
+    .hero{--hpt:64px;--hpx:20px;--hpb:56px;}
     .hero-main .eyebrow{display:inline-block;}
     .hero h1{margin-top:18px;line-height:1.06;}
     .hero p{font-size:14.5px;margin-top:18px;}
@@ -1056,12 +1057,6 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
   .na-note a{color:var(--gold);text-decoration:underline;}
 
   /* ---------- HERO PICTURES: show the WHOLE photo (group shots keep every face) ---------- */
-  .hero-bg-cell{position:relative;overflow:hidden;min-width:0;}
-  .hero-bg-cell::before{
-    content:'';position:absolute;inset:-24px;background:var(--bg) center/cover no-repeat;
-    filter:blur(26px) grayscale(25%) brightness(.8);opacity:.5;
-  }
-  .hero-bg .hero-bg-cell img{position:relative;width:100%;height:100%;object-fit:contain;}
   .hero-tag--img{background:var(--black);}
   .hero-tag--img::before{
     content:'';position:absolute;inset:-16px;z-index:0;background:var(--bg) center/cover no-repeat;
@@ -1821,7 +1816,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
     app.innerHTML =
       '<section class="hero">'
         + '<div class="hero-bg">' + heroBg.map(function(src){
-            return '<div class="hero-bg-cell" style="--bg:url(\''+cssUrl(src)+'\')"><img src="'+src+'" alt=""></div>';
+            return '<figure class="hero-bg-cell"><img src="'+src+'" alt="Vybe House"></figure>';
           }).join('') + '</div>'
         + '<div class="hero-content">'
           + '<div class="hero-main">'
@@ -1976,6 +1971,29 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
           + '</div>'
         + '</div>'
       + '</section>';
+
+    // Hero photos: give each panel its photo's true aspect ratio so the full image fills it
+    (function(){
+      var band = app.querySelector('.hero-bg');
+      if (!band) return;
+      var cells = Array.prototype.slice.call(band.querySelectorAll('.hero-bg-cell'));
+      function sync(){
+        var sum = 0;
+        cells.forEach(function(cell){
+          var im = cell.querySelector('img');
+          var ar = (im && im.naturalWidth && im.naturalHeight) ? im.naturalWidth / im.naturalHeight : 0.8;
+          cell.style.setProperty('--ar', ar);
+          sum += ar;
+        });
+        band.style.setProperty('--sum', sum || 1.6);
+      }
+      cells.forEach(function(cell){
+        var im = cell.querySelector('img');
+        if (!im) return;
+        im.addEventListener('load', sync);
+      });
+      sync();
+    })();
 
     Array.prototype.forEach.call(app.querySelectorAll('.portfolio-item'), function(btn){
       btn.addEventListener('click', function(){
