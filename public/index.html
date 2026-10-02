@@ -1035,6 +1035,26 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
     .tab-btn{flex:0 0 auto;white-space:nowrap;padding:14px 14px;}
     .admin-bar > div:last-child{flex-wrap:wrap;}
   }
+
+  /* ---------- AVAILABILITY ---------- */
+  .avail-btn.on{border-color:#6fbf73;color:#6fbf73;}
+  .avail-btn.on:hover{background:#6fbf73;color:var(--black);}
+  .avail-btn.off{border-color:var(--red);color:var(--red);}
+  .avail-btn.off:hover{background:var(--red);color:#fff;}
+  .avail-btn:disabled{opacity:.5;cursor:default;}
+  .meta-item b.is-av{color:#6fbf73;}
+  .meta-item b.is-na{color:var(--red);}
+  .na-tag{
+    position:absolute;top:12px;left:12px;z-index:2;background:rgba(10,10,10,.8);
+    border:1px solid var(--red);color:var(--red);font-size:10px;letter-spacing:1px;
+    text-transform:uppercase;padding:4px 9px;font-weight:600;pointer-events:none;
+  }
+  .na-note{
+    max-width:380px;border:1px solid var(--red);background:rgba(224,106,90,.08);
+    padding:14px 16px;color:var(--muted);font-size:13px;line-height:1.7;
+  }
+  .na-note b{display:block;color:var(--red);font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+  .na-note a{color:var(--gold);text-decoration:underline;}
 </style>
 </head>
 <body>
@@ -1189,6 +1209,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
   function submitTestimonial(payload){ return apiFetch('/testimonials', { method:'POST', body: payload }); }
   function fetchAdminTestimonials(){ return apiFetch('/testimonials/admin/all'); }
   function setTestimonialStatus(id, status){ return apiFetch('/testimonials/admin/' + encodeURIComponent(id), { method:'PATCH', body: { status: status } }); }
+  function setModelAvailability(id, availability){ return apiFetch('/models/admin/' + encodeURIComponent(id), { method:'PATCH', body: { availability: availability } }); }
   function setModelPhotos(id, photoUrls){ return apiFetch('/models/admin/' + encodeURIComponent(id), { method:'PATCH', body: { photoUrls: photoUrls } }); }
   function deleteModelAdmin(id){ return apiFetch('/models/admin/' + encodeURIComponent(id), { method:'DELETE' }); }
   function deleteBookingAdmin(id){ return apiFetch('/bookings/admin/' + encodeURIComponent(id), { method:'DELETE' }); }
@@ -1957,12 +1978,16 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
   /* =========================================================
      BROWSE MODELS (full roster)
      ========================================================= */
+  // A model counts as available unless the admin switched them to "Not available".
+  function modelIsAvailable(m){ return !m.availability || /^available$/i.test(String(m.availability).trim()); }
+
   function modelCard(m, i){
     var photo = (m.photoUrls && m.photoUrls[0]) || '';
     var staggerAttr = (typeof i === 'number') ? ' reveal" style="'+revealDelay(i,60) : '';
     return '<a href="#/model/'+encodeURIComponent(m.slug)+'" class="talent-card'+staggerAttr+'">'
       + '<div class="talent-photo ph-gradient'+(photo?' shimmer':'')+'">'
         + (photo ? '<img src="'+photo+'" alt="'+esc(m.fullName)+'" loading="lazy" class="lazy-img" onload="this.classList.add(\'loaded\');this.parentElement.classList.add(\'loaded\')">' : '')
+        + (modelIsAvailable(m) ? '' : '<span class="na-tag">Not available</span>')
         + '<div class="talent-photo-overlay"><h4 class="serif">'+esc(m.fullName)+'</h4><span>'+esc(m.category)+'</span></div>'
       + '</div>'
       + '<div class="talent-info"><h4>'+esc(m.fullName)+'</h4><span>'+esc(m.category)+'</span></div>'
@@ -2367,7 +2392,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
               + metaItem('Height', model.height || 'N/A')
               + metaItem('Category', model.bodyType || model.category)
               + metaItem('Based in', model.basedIn || 'N/A')
-              + metaItem('Status', model.availability || 'Available')
+              + metaItem('Status', modelIsAvailable(model) ? 'Available' : 'Not available', modelIsAvailable(model) ? 'is-av' : 'is-na')
             + '</div>'
             + (model.bio ? '<p class="profile-bio">'+esc(model.bio)+'</p>' : '')
             + '<div id="bookingSlot"></div>'
@@ -2378,13 +2403,17 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
     renderBookingWidget(model);
     wireProfileGallery(photos, model.fullName);
 
-    function metaItem(label,value){
-      return '<div class="meta-item">'+label+'<b>'+esc(value)+'</b></div>';
+    function metaItem(label,value,cls){
+      return '<div class="meta-item">'+label+'<b'+(cls?' class="'+cls+'"':'')+'>'+esc(value)+'</b></div>';
     }
   }
 
   function renderBookingWidget(model){
     var slot = document.getElementById('bookingSlot');
+    if (!modelIsAvailable(model)){
+      slot.innerHTML = '<div class="na-note"><b>Not available for booking</b>' + esc(model.fullName.split(' ')[0]) + ' is not taking bookings right now. Check back soon, or <a href="#/models">browse other talent</a>.</div>';
+      return;
+    }
     slot.innerHTML = '<button class="btn-primary" id="openBooking">Book '+esc(model.fullName.split(' ')[0])+'</button>';
     document.getElementById('openBooking').addEventListener('click', function(){
       slot.innerHTML =
@@ -2598,6 +2627,9 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
                   return '<div class="decided-row" style="align-items:center;gap:12px;flex-wrap:wrap;"><span style="flex:1;min-width:140px;">'+esc(a.fullName)+'</span>'
                     + '<span class="status-'+a.status+'">'+(a.status==='approved'?'approved \u00b7 live on site':a.status)+'</span>'
                     + (a.status==='approved' && a.slug ? '<a class="btn btn-small" href="#/model/'+encodeURIComponent(a.slug)+'" target="_blank" rel="noopener">View</a>' : '')
+                    + (a.status==='approved'
+                        ? '<button class="btn btn-small avail-btn '+(modelIsAvailable(a)?'on':'off')+'" data-avail="'+a.id+'" title="Click to switch">'+(modelIsAvailable(a)?'\u25cf Available':'\u25cf Not available')+'</button>'
+                        : '')
                     + '<button class="btn btn-small" data-pmtoggle="'+a.id+'">Photos ('+((a.photoUrls||[]).length)+')</button>'
                     + '<button class="btn btn-small btn-danger" data-modeldel="'+a.id+'">Delete profile</button>'
                     + '<div data-pmpanel="'+a.id+'" style="flex-basis:100%;"></div></div>';
@@ -2613,6 +2645,9 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
           btn.addEventListener('click', function(){ deleteModelLocal(btn.getAttribute('data-modeldel')); });
         });
         wirePhotoPanels(tabContent);
+        Array.prototype.forEach.call(tabContent.querySelectorAll('[data-avail]'), function(btn){
+          btn.addEventListener('click', function(){ toggleAvailability(btn.getAttribute('data-avail'), btn); });
+        });
       } else if (activeTab === 'bookings'){
         var unseenB = seenIds(SEEN_BOOKINGS_KEY);
         tabContent.innerHTML = '<div class="admin-list">' + (bookings.length === 0
@@ -2816,6 +2851,23 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
           if (handleAuthError(err)) return;
           alert(err.message || 'Could not save these photos.');
         });
+      });
+    }
+
+    function toggleAvailability(id, btn){
+      var m = pmFind(id);
+      if (!m) return;
+      var next = modelIsAvailable(m) ? 'Not available' : 'Available';
+      btn.disabled = true;
+      setModelAvailability(id, next).then(function(updated){
+        m.availability = (updated && updated.availability) ? updated.availability : next;
+        dropModelCache();
+        toast(m.fullName + (next === 'Available' ? ' is now available for booking' : ' is now marked not available'));
+        drawShell();
+      }).catch(function(err){
+        btn.disabled = false;
+        if (handleAuthError(err)) return;
+        alert(err.message || 'Could not update availability.');
       });
     }
 
