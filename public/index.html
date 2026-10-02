@@ -387,9 +387,14 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
     white-space:nowrap;
   }
   .seen-in-logo:hover{opacity:1;color:var(--offwhite);}
-  .seen-in-logo img{display:block;height:26px;width:auto;object-fit:contain;filter:grayscale(1);opacity:.7;transition:opacity .3s ease,filter .3s ease;}
+  .seen-in-logo img{display:block;height:calc(var(--logo-h,30px) * .8);width:auto;max-width:100%;object-fit:contain;filter:grayscale(1);opacity:.7;transition:opacity .3s ease,filter .3s ease;}
   .seen-in-logo:hover img{opacity:1;filter:grayscale(0);}
-  @media(min-width:700px){.seen-in{padding:44px 40px;}.seen-in-logo{font-size:23px;}.seen-in-logo img{height:30px;}}
+  @media(min-width:700px){.seen-in{padding:44px 40px;}.seen-in-logo{font-size:23px;}.seen-in-logo img{height:var(--logo-h,30px);}}
+  .logo-size{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:10px;}
+  .logo-size label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px;}
+  .logo-size input[type=range]{width:100%;}
+  .logo-size-prev{margin-top:12px;background:rgba(255,255,255,.04);border-radius:8px;padding:14px;overflow:auto;text-align:center;min-height:60px;}
+  .logo-size-prev img{display:inline-block;height:30px;width:auto;max-width:100%;object-fit:contain;}
 
   /* ---------- TESTIMONIALS ---------- */
   .testimonial-grid{display:grid;gap:26px;grid-template-columns:1fr;}
@@ -1952,7 +1957,8 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
         '<div class="seen-in reveal">'
         + '<div class="seen-in-label">'+esc(content.seenIn.label)+'</div>'
         + '<div class="seen-in-row">' + content.seenIn.items.map(function(s){
-            return '<span class="seen-in-logo">' + (s.logo ? '<img src="'+s.logo+'" alt="'+esc(s.name)+'" loading="lazy">' : esc(s.name)) + '</span>';
+            var lh = Math.max(16, Math.min(240, parseInt(s.size,10) || 30));
+            return '<span class="seen-in-logo" style="--logo-h:'+lh+'px">' + (s.logo ? '<img src="'+s.logo+'" alt="'+esc(s.name)+'" loading="lazy">' : esc(s.name)) + '</span>';
           }).join('') + '</div>'
       + '</div>'
       ) : '')
@@ -3463,6 +3469,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
       });
     }
 
+    function logoSize(item){ return Math.max(16, Math.min(200, parseInt(item.size,10) || 30)); }
     function renderSeenInPanel(panel, content){
       var s = content.seenIn;
       panel.innerHTML =
@@ -3487,6 +3494,11 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
                   ? '<div class="image-manager" style="margin-top:14px;"><div class="image-thumb"><img src="'+item.logo+'" alt=""><button type="button" class="del-btn" data-seeninlogodel="'+i+'" title="Remove">&times;</button></div></div>'
                   : '<p class="empty-note" style="text-align:left;margin:14px 0 0;">No logo image. The name above shows as text instead.</p>')
               + '<div class="field" style="margin-top:10px;"><input type="file" accept="image/*" data-seeninlogo="'+i+'"></div>'
+              + (item.logo
+                  ? '<div class="logo-size"><label>Logo size <span data-seeninsizeval="'+i+'">'+logoSize(item)+' px</span></label>'
+                    + '<input type="range" min="16" max="200" step="2" value="'+logoSize(item)+'" data-seeninsize="'+i+'">'
+                    + '<div class="logo-size-prev"><img src="'+item.logo+'" alt="" data-seeninprev="'+i+'" style="height:'+logoSize(item)+'px"></div></div>'
+                  : '')
             + '</div>';
           }).join('')
         + '<div class="content-block">'
@@ -3526,12 +3538,28 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
           var i = parseInt(input.getAttribute('data-seeninlogo'),10);
           var file = (e.target.files || [])[0];
           if (!file) return;
-          fileToCompressedDataUrl(file, 400, 0.8).then(function(url){
+          fileToCompressedDataUrl(file, 800, 0.85).then(function(url){
             s.items[i].logo = url;
             saveContent(content);
             toast('Logo image added');
             renderSeenInPanel(panel, content);
           });
+        });
+      });
+
+      // Size slider: preview grows as you drag, saves when you let go.
+      Array.prototype.forEach.call(panel.querySelectorAll('[data-seeninsize]'), function(range){
+        var i = parseInt(range.getAttribute('data-seeninsize'),10);
+        var prev = panel.querySelector('[data-seeninprev="'+i+'"]');
+        var val = panel.querySelector('[data-seeninsizeval="'+i+'"]');
+        range.addEventListener('input', function(){
+          if (prev) prev.style.height = range.value + 'px';
+          if (val) val.textContent = range.value + ' px';
+        });
+        range.addEventListener('change', function(){
+          s.items[i].size = parseInt(range.value,10);
+          saveContent(content);
+          toast('Logo size saved');
         });
       });
 
