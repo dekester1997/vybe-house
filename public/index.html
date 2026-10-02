@@ -199,7 +199,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
   }
   .hero-bg{
     position:absolute;inset:0;z-index:0;
-    display:grid;grid-template-columns:repeat(3,1fr);
+    display:grid;grid-template-columns:repeat(2,1fr);
   }
   .hero-bg img{
     width:100%;height:100%;object-fit:cover;
@@ -925,6 +925,29 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
     .hero-actions .btn,.hero-actions .btn-primary{flex:1 1 100%;}
     .testimonial-card{flex-basis:88%;}
   }
+
+  /* ---------- PHONE VIEW: show uploaded pictures whole, never cropped ---------- */
+  @media(max-width:699px){
+    .talent-photo{aspect-ratio:auto;background:var(--black);}
+    .talent-photo.ph-gradient:not(:has(img)),.talent-photo.shimmer:not(.loaded){aspect-ratio:4/5;}
+    .talent-photo img{position:relative;inset:auto;display:block;width:100%;height:auto;object-fit:contain;}
+    .talent-card:hover .talent-photo img{transform:none;}
+    .profile-main-photo{aspect-ratio:auto;background:var(--black);}
+    .profile-main-photo.ph-gradient:not(:has(img)){aspect-ratio:3/4;}
+    .profile-main-photo img{position:relative;inset:auto;display:block;width:100%;height:auto;object-fit:contain;}
+    .profile-thumbs img{object-fit:contain;background:var(--black);}
+    .about-photo{aspect-ratio:auto;background:var(--black);}
+    .about-photo.ph-gradient:not(:has(img)){aspect-ratio:4/5;}
+    .about-photo img{position:relative;inset:auto;display:block;width:100%;height:auto;object-fit:contain;}
+    .about-photo:hover img{transform:none;}
+    .portfolio-item{background:var(--black);}
+    .portfolio-item img{object-fit:contain;}
+    .portfolio-item:hover img{transform:none;}
+    .hero-tag--img{background-size:100% 100%,contain !important;background-color:var(--black);}
+    .gallery-modal-grid{grid-template-columns:1fr;}
+    .gallery-modal-grid img{aspect-ratio:auto;height:auto;object-fit:contain;}
+  }
+  .app-card img{object-fit:contain;background:var(--panel-2);}
 </style>
 </head>
 <body>
@@ -1077,6 +1100,19 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
   function submitTestimonial(payload){ return apiFetch('/testimonials', { method:'POST', body: payload }); }
   function fetchAdminTestimonials(){ return apiFetch('/testimonials/admin/all'); }
   function setTestimonialStatus(id, status){ return apiFetch('/testimonials/admin/' + encodeURIComponent(id), { method:'PATCH', body: { status: status } }); }
+  function deleteModelAdmin(id){ return apiFetch('/models/admin/' + encodeURIComponent(id), { method:'DELETE' }); }
+  function deleteBookingAdmin(id){ return apiFetch('/bookings/admin/' + encodeURIComponent(id), { method:'DELETE' }); }
+  function deleteInquiryAdmin(id){ return apiFetch('/inquiries/admin/' + encodeURIComponent(id), { method:'DELETE' }); }
+  // Forget saved copies of the roster so a deleted profile disappears from the site straight away.
+  function dropModelCache(){
+    Object.keys(memCache).forEach(function(k){ if (k.indexOf('/models') === 0) delete memCache[k]; });
+    try {
+      for (var i = localStorage.length - 1; i >= 0; i--){
+        var key = localStorage.key(i);
+        if (key && key.indexOf(CACHE_PREFIX + '/models') === 0) localStorage.removeItem(key);
+      }
+    } catch(e){}
+  }
   function deleteTestimonialAdmin(id){ return apiFetch('/testimonials/admin/' + encodeURIComponent(id), { method:'DELETE' }); }
 
   /* =========================================================
@@ -1300,14 +1336,18 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
   // set of images. Swap this for real shoot photos whenever they're ready;
   // callers just need an array of URLs back.
   function placeholderImages(seed, count, w, h){
-    w = w || 600; h = h || 800;
+    // Neutral on-brand placeholder (no stock photos). Same image for every slot.
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500">'
+      + '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#20201c"/><stop offset="1" stop-color="#2c2620"/></linearGradient></defs>'
+      + '<rect width="400" height="500" fill="url(#g)"/>'
+      + '<g fill="none" stroke="#c9a44c" stroke-opacity=".35" stroke-width="3" stroke-linejoin="round">'
+      + '<rect x="156" y="222" width="88" height="62" rx="9"/><circle cx="200" cy="253" r="17"/><path d="M180 222l7-11h26l7 11"/></g></svg>';
+    var url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
     var out = [];
-    for (var i = 1; i <= count; i++){
-      out.push('https://picsum.photos/seed/vybehouse-' + encodeURIComponent(seed) + '-' + i + '/' + w + '/' + h);
-    }
+    for (var k = 0; k < count; k++) out.push(url);
     return out;
   }
-  function heroBgImages(){ return placeholderImages('hero', 3, 400, 500); }
+  function heroBgImages(){ return placeholderImages('hero', 2, 400, 500); }
 
   /* =========================================================
      PORTFOLIO GALLERY MODAL
@@ -1633,7 +1673,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
       ? '<p class="empty-note">No approved profiles yet. Approved models will appear here automatically.</p>'
       : '<div class="talent-grid">' + approved.map(function(m,i){ return modelCard(m,i); }).join('') + '</div>';
 
-    var heroBg = (content.hero.bgImages && content.hero.bgImages.length) ? content.hero.bgImages : heroBgImages();
+    var heroBg = (content.hero.bgImages && content.hero.bgImages.length) ? content.hero.bgImages.slice(0,2) : heroBgImages();
 
     app.innerHTML =
       '<section class="hero">'
@@ -1651,7 +1691,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
               var bg = t.image
                 ? ' style="background:linear-gradient(180deg,rgba(10,10,10,.05) 45%,rgba(10,10,10,.85) 100%), url(\''+t.image+'\') center/cover no-repeat;"'
                 : '';
-              return '<div class="hero-tag'+(t.image?'':' ph-gradient')+'"'+bg+'><span>'+esc(t.label)+'</span></div>';
+              return '<div class="hero-tag'+(t.image?' hero-tag--img':' ph-gradient')+'"'+bg+'><span>'+esc(t.label)+'</span></div>';
             }).join('') + '</div></div>'
         + '</div>'
       + '</section>'
@@ -2346,7 +2386,10 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
           + '<div class="admin-list">' + (decided.length === 0
               ? '<p class="empty-note" style="text-align:left;">Nothing decided yet.</p>'
               : decided.map(function(a){
-                  return '<div class="decided-row"><span>'+esc(a.fullName)+'</span><span class="status-'+a.status+'">'+a.status+'</span></div>';
+                  return '<div class="decided-row" style="align-items:center;gap:12px;flex-wrap:wrap;"><span style="flex:1;min-width:140px;">'+esc(a.fullName)+'</span>'
+                    + '<span class="status-'+a.status+'">'+(a.status==='approved'?'approved \u00b7 live on site':a.status)+'</span>'
+                    + (a.status==='approved' && a.slug ? '<a class="btn btn-small" href="#/model/'+encodeURIComponent(a.slug)+'" target="_blank" rel="noopener">View</a>' : '')
+                    + '<button class="btn btn-small btn-danger" data-modeldel="'+a.id+'">Delete profile</button></div>';
                 }).join('')) + '</div>';
 
         Array.prototype.forEach.call(tabContent.querySelectorAll('[data-approve]'), function(btn){
@@ -2354,6 +2397,9 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
         });
         Array.prototype.forEach.call(tabContent.querySelectorAll('[data-reject]'), function(btn){
           btn.addEventListener('click', function(){ setStatus(btn.getAttribute('data-reject'), 'rejected'); });
+        });
+        Array.prototype.forEach.call(tabContent.querySelectorAll('[data-modeldel]'), function(btn){
+          btn.addEventListener('click', function(){ deleteModelLocal(btn.getAttribute('data-modeldel')); });
         });
       } else if (activeTab === 'bookings'){
         tabContent.innerHTML = '<div class="admin-list">' + (bookings.length === 0
@@ -2364,8 +2410,10 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
                 + '<b>'+esc(b.clientName)+'</b><br>'
                 + esc(b.email) + (b.phone ? ' · '+esc(b.phone) : '') + '<br>'
                 + (b.message ? '<span class="muted">'+esc(b.message)+'</span>' : '')
+                + '<div class="app-actions"><button class="btn btn-small btn-danger" data-bookdel="'+b.id+'">Delete</button></div>'
               + '</div>';
             }).join('')) + '</div>';
+        wireRowDelete(tabContent, 'data-bookdel', 'booking request', deleteBookingAdmin, 'bookings');
       } else if (activeTab === 'projects'){
         tabContent.innerHTML = '<div class="admin-list">' + (inquiries.length === 0
           ? '<p class="empty-note" style="text-align:left;">No project briefs yet.</p>'
@@ -2377,8 +2425,10 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
                 + (p.budget ? '<span class="muted">Budget: '+esc(p.budget)+'</span><br>' : '')
                 + (p.timeline ? '<span class="muted">Timeline: '+esc(p.timeline)+'</span><br>' : '')
                 + '<span class="muted">'+esc(p.message)+'</span>'
+                + '<div class="app-actions"><button class="btn btn-small btn-danger" data-projdel="'+p.id+'">Delete</button></div>'
               + '</div>';
             }).join('')) + '</div>';
+        wireRowDelete(tabContent, 'data-projdel', 'project brief', deleteInquiryAdmin, 'inquiries');
       } else if (activeTab === 'testimonials'){
         tabContent.innerHTML =
           '<p class="muted" style="font-size:12.5px;margin:-6px 0 20px;">These go live the moment someone submits them. Hide or delete anything that shouldn\'t be public.</p>'
@@ -2423,6 +2473,39 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
       }
     }
 
+    function deleteModelLocal(id){
+      var m = state.models.find(function(x){ return x.id === id; });
+      if (!m) return;
+      var live = m.status === 'approved' ? ' It will be removed from the website.' : '';
+      if (!confirm('Delete ' + m.fullName + '\'s whole profile, with all photos and details?' + live + ' This cannot be undone.')) return;
+      deleteModelAdmin(id).then(function(){
+        state.models = state.models.filter(function(x){ return x.id !== id; });
+        dropModelCache();
+        toast(m.fullName + ' deleted');
+        drawShell();
+      }).catch(function(err){
+        if (handleAuthError(err)) return;
+        alert(err.message || 'Could not delete this profile.');
+      });
+    }
+
+    function wireRowDelete(container, attr, label, deleteFn, stateKey){
+      Array.prototype.forEach.call(container.querySelectorAll('['+attr+']'), function(btn){
+        btn.addEventListener('click', function(){
+          if (!confirm('Delete this ' + label + '? This cannot be undone.')) return;
+          var id = btn.getAttribute(attr);
+          deleteFn(id).then(function(){
+            state[stateKey] = state[stateKey].filter(function(x){ return x.id !== id; });
+            toast(label.charAt(0).toUpperCase() + label.slice(1) + ' deleted');
+            drawShell();
+          }).catch(function(err){
+            if (handleAuthError(err)) return;
+            alert(err.message || 'Could not delete this ' + label + '.');
+          });
+        });
+      });
+    }
+
     function setTestimonialStatusLocal(id, status){
       var t = state.testimonials.find(function(x){ return x.id === id; });
       if (!t) return;
@@ -2448,6 +2531,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
           + '<div class="app-actions">'
             + '<button class="btn-primary" data-approve="'+a.id+'">Approve</button>'
             + '<button class="btn" data-reject="'+a.id+'">Reject</button>'
+            + '<button class="btn btn-danger" data-modeldel="'+a.id+'">Delete</button>'
           + '</div>'
         + '</div>'
       + '</div>';
@@ -2561,10 +2645,10 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
         + '</div>'
         + '<div class="content-block">'
           + '<h3>Hero background images</h3>'
-          + '<p class="hint">Shown as 3 large panels behind the hero text. Leave empty to use placeholder imagery.</p>'
+          + '<p class="hint">Shown as 2 large panels behind the hero text. Leave empty to use placeholder imagery.</p>'
           + imageManagerHtml(hero.bgImages)
-          + ((hero.bgImages||[]).length >= 3
-              ? '<p class="hint">Maximum of 3 reached — remove one above to add another.</p>'
+          + ((hero.bgImages||[]).length >= 2
+              ? '<p class="hint">Maximum of 2 reached — remove one above to add another.</p>'
               : '<div class="field" style="margin-top:14px;"><input type="file" id="heroBgUpload" accept="image/*" multiple></div>')
         + '</div>';
 
@@ -2633,7 +2717,7 @@ window.VYBE_API_BASE = window.VYBE_API_BASE || '/api';
         heroBgUploadInput.addEventListener('change', function(e){
           var files = Array.prototype.slice.call(e.target.files || []);
           if (!files.length) return;
-          var room = 3 - hero.bgImages.length;
+          var room = 2 - hero.bgImages.length;
           files = files.slice(0, room);
           Promise.all(files.map(function(f){ return fileToCompressedDataUrl(f, 1200, 0.75); }))
             .then(function(urls){
